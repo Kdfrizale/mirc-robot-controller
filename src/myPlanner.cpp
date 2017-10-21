@@ -62,17 +62,17 @@ moveit_msgs::RobotTrajectory combineTrajectories(const moveit_msgs::RobotTraject
     otherTrajectory = secondaryTrajectory;
     smallestSize = secondaryTrajectory.joint_trajectory.points.size();
     biggestSize = mainTrajectory.joint_trajectory.points.size();
-    combineTrajectories.joint_trajectory.joint_names.push_back("m1n6a200_joint_finger_1");
+    combineTrajectories.joint_trajectory.joint_names.push_back("m1n6s200_joint_finger_1");
     ROS_INFO("Switched to secondaryTrajectory being smaller");
   }
   else{
     ROS_INFO("Switched to mainTrajectory being smaller");
-    combineTrajectories.joint_trajectory.joint_names.push_back("m1n6a200_joint_finger_2");
+    combineTrajectories.joint_trajectory.joint_names.push_back("m1n6s200_joint_finger_2");
   }
   //moveit_msgs::RobotTrajectory combineTrajectories = mainTrajectory;
   //Then add additional joint_names and their corresponding values(pos,vel,accel) to the combineTrajectories
   //Also beaware of the time from start for each point, it may be neseccary to take the largest one out of main and secondary
-  //combineTrajectories.joint_trajectory.joint_names.push_back("m1n6a200_joint_finger_1");
+  //combineTrajectories.joint_trajectory.joint_names.push_back("m1n6s200_joint_finger_1");
   ROS_INFO("ABOUT TO COMBINE trajectories");
   //ROS_INFO("There are [%zd] points to go through",mainTrajectory.joint_trajectory.points.size());
 //  ROS_INFO("There are [%zd] points to go through",secondaryTrajectory.joint_trajectory.points.size());
@@ -185,10 +185,10 @@ int main(int argc, char** argv)
       planning_interface::MotionPlanResponse res2;
 
       req.group_name = "chainArm";
-      moveit_msgs::Constraints pose_goal_tip_2 = kinematic_constraints::constructGoalConstraints("m1n6a200_link_finger_tip_2", poseTip2, tolerance_pose, tolerance_angle);
+      moveit_msgs::Constraints pose_goal_tip_2 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_finger_tip_2", poseTip2, tolerance_pose, tolerance_angle);
       req.goal_constraints.push_back(pose_goal_tip_2);
 
-      moveit_msgs::Constraints pose_goal_link6 = kinematic_constraints::constructGoalConstraints("m1n6a200_link_6", poseLink6, tolerance_pose, tolerance_angle);
+      moveit_msgs::Constraints pose_goal_link6 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_6", poseLink6, tolerance_pose, tolerance_angle);
       req.goal_constraints.push_back(pose_goal_link6);
 
       ROS_INFO("about to start planning");
@@ -208,7 +208,7 @@ int main(int argc, char** argv)
       ROS_INFO("It took [%f] seconds to get past the first plan", duration);
 
       req2.group_name = "chainArmLeft";
-      moveit_msgs::Constraints pose_goal_tip_1 = kinematic_constraints::constructGoalConstraints("m1n6a200_link_finger_tip_1", poseTip1, tolerance_pose, tolerance_angle);
+      moveit_msgs::Constraints pose_goal_tip_1 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_finger_tip_1", poseTip1, tolerance_pose, tolerance_angle);
       req2.goal_constraints.push_back(pose_goal_tip_1);
       req2.goal_constraints.push_back(pose_goal_link6);
 

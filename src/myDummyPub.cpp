@@ -19,17 +19,17 @@ int main(int argc, char **argv)
   int count =0;
 
   geometry_msgs::PoseStamped sensedPoseTip2;//Right Finger tip---Demo data
-  sensedPoseTip2.header.frame_id = "m1n6a200_link_base";
-  sensedPoseTip2.pose.position.x = 0.305735;
-  sensedPoseTip2.pose.position.y = 0.196963;
-  sensedPoseTip2.pose.position.z = 0.663391;
-  sensedPoseTip2.pose.orientation.x = 0.623481;
-  sensedPoseTip2.pose.orientation.y = 0.3335;
-  sensedPoseTip2.pose.orientation.z = 0.623522;
-  sensedPoseTip2.pose.orientation.w = 0.333571;
+  sensedPoseTip2.header.frame_id = "m1n6s200_link_base";
+  sensedPoseTip2.pose.position.x = 0.365256;
+  sensedPoseTip2.pose.position.y = 0.257055;
+  sensedPoseTip2.pose.position.z = 0.678096;
+  sensedPoseTip2.pose.orientation.x = 0.688917;
+  sensedPoseTip2.pose.orientation.y = 0.0594181;
+  sensedPoseTip2.pose.orientation.z = 0.533242;
+  sensedPoseTip2.pose.orientation.w = 0.487356;
 
   geometry_msgs::PoseStamped sensedPoseLink6;//wrist --- Demo Data
-  sensedPoseLink6.header.frame_id = "m1n6a200_link_base";
+  sensedPoseLink6.header.frame_id = "m1n6s200_link_base";
   sensedPoseLink6.pose.position.x = 0.308219;
   sensedPoseLink6.pose.position.y = 0.0494515;
   sensedPoseLink6.pose.position.z = 0.727438;
@@ -39,14 +39,14 @@ int main(int argc, char **argv)
   sensedPoseLink6.pose.orientation.w = 0.788501;
 
   geometry_msgs::PoseStamped sensedPoseTip1;//Left Finger tip---Demo data
-  sensedPoseTip1.header.frame_id = "m1n6a200_link_base";
-  sensedPoseTip1.pose.position.x = 0.30573;
-  sensedPoseTip1.pose.position.y = 0.211976;
-  sensedPoseTip1.pose.position.z = 0.723024;
-  sensedPoseTip1.pose.orientation.x = 0.648451;
-  sensedPoseTip1.pose.orientation.y = 0.282066;
-  sensedPoseTip1.pose.orientation.z = -0.648369;
-  sensedPoseTip1.pose.orientation.w = -0.282078;
+  sensedPoseTip1.header.frame_id = "m1n6s200_link_base";
+  sensedPoseTip1.pose.position.x = 0.350583;
+  sensedPoseTip1.pose.position.y = 0.240098;
+  sensedPoseTip1.pose.position.z = 0.708247;
+  sensedPoseTip1.pose.orientation.x = -0.641598;
+  sensedPoseTip1.pose.orientation.y = -0.331987;
+  sensedPoseTip1.pose.orientation.z = 0.293815;
+  sensedPoseTip1.pose.orientation.w = 0.625947;
 
   while (ros::ok()){
     sensedPoseTip2.pose.position.y += 0.001;
