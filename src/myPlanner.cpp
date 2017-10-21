@@ -34,8 +34,8 @@ bool messageReceived = false;
 
 // A tolerance of 0.01 m is specified in position
 // and 0.01 radians in orientation
-std::vector<double> tolerance_pose(3, 0.00000001);
-std::vector<double> tolerance_angle(4, 0.0000001);//0.01 is normal
+std::vector<double> tolerance_pose(3, 0.001);
+std::vector<double> tolerance_angle(4, 0.001);//0.01 is normal
 
 
 /////////////////////////////////////FUNCTIONS/////////////////////////////////////////////
@@ -186,11 +186,10 @@ int main(int argc, char** argv)
 
       req.group_name = "chainArm";
       moveit_msgs::Constraints pose_goal_tip_2 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_finger_tip_2", poseTip2, tolerance_pose, tolerance_angle);
-      //req.goal_constraints.push_back(pose_goal_tip_2);
+      req.goal_constraints.push_back(pose_goal_tip_2);
 
       moveit_msgs::Constraints pose_goal_link6 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_6", poseLink6, tolerance_pose, tolerance_angle);
       req.goal_constraints.push_back(pose_goal_link6);
-      req.goal_constraints.push_back(pose_goal_tip_2);
 
       ROS_INFO("about to start planning");
       planning_pipeline->generatePlan(planning_scene,req,res);
@@ -217,9 +216,8 @@ int main(int argc, char** argv)
 
       req2.group_name = "chainArmLeft";
       moveit_msgs::Constraints pose_goal_tip_1 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_finger_tip_1", poseTip1, tolerance_pose, tolerance_angle);
-      //req2.goal_constraints.push_back(pose_goal_tip_1);
-      req2.goal_constraints.push_back(pose_goal_link6);
       req2.goal_constraints.push_back(pose_goal_tip_1);
+      req2.goal_constraints.push_back(pose_goal_link6);
 
       ROS_INFO("about to start planning2");
       planning_pipeline->generatePlan(planning_scene,req2,res2);
