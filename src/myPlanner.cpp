@@ -34,8 +34,8 @@ bool messageReceived = false;
 
 // A tolerance of 0.01 m is specified in position
 // and 0.01 radians in orientation
-std::vector<double> tolerance_pose(3, 0.01);
-std::vector<double> tolerance_angle(3, 0.01);//0.01 is normal
+std::vector<double> tolerance_pose(3, 0.00000001);
+std::vector<double> tolerance_angle(4, 0.0000001);//0.01 is normal
 
 
 /////////////////////////////////////FUNCTIONS/////////////////////////////////////////////
@@ -186,10 +186,11 @@ int main(int argc, char** argv)
 
       req.group_name = "chainArm";
       moveit_msgs::Constraints pose_goal_tip_2 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_finger_tip_2", poseTip2, tolerance_pose, tolerance_angle);
-      req.goal_constraints.push_back(pose_goal_tip_2);
+      //req.goal_constraints.push_back(pose_goal_tip_2);
 
       moveit_msgs::Constraints pose_goal_link6 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_6", poseLink6, tolerance_pose, tolerance_angle);
       req.goal_constraints.push_back(pose_goal_link6);
+      req.goal_constraints.push_back(pose_goal_tip_2);
 
       ROS_INFO("about to start planning");
       planning_pipeline->generatePlan(planning_scene,req,res);
@@ -204,13 +205,21 @@ int main(int argc, char** argv)
       moveit_msgs::MotionPlanResponse midResponse;
       res.getMessage(midResponse);//Get the first motion plan
 
+
+      /* First, set the state in the planning scene to the final state of the last plan */
+    //  robot_state::RobotState& robot_state_mid = planning_scene->getCurrentStateNonConst();
+    //  planning_scene->setCurrentState(midResponse.trajectory_start);
+    //  const robot_state::JointModelGroup* joint_model_group_mid = robot_state_mid.getJointModelGroup("chainArm");
+      //robot_state_mid.setJointGroupPositions(joint_model_group_mid, midResponse.trajectory.joint_trajectory.points.back().positions);
+
       duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
       ROS_INFO("It took [%f] seconds to get past the first plan", duration);
 
       req2.group_name = "chainArmLeft";
       moveit_msgs::Constraints pose_goal_tip_1 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_finger_tip_1", poseTip1, tolerance_pose, tolerance_angle);
-      req2.goal_constraints.push_back(pose_goal_tip_1);
+      //req2.goal_constraints.push_back(pose_goal_tip_1);
       req2.goal_constraints.push_back(pose_goal_link6);
+      req2.goal_constraints.push_back(pose_goal_tip_1);
 
       ROS_INFO("about to start planning2");
       planning_pipeline->generatePlan(planning_scene,req2,res2);
@@ -252,7 +261,7 @@ int main(int argc, char** argv)
       //Update the Planning Scene Robot Model to show where the plans ended
       //////////////////////////////////////////////////////////////////////////////////////////////////////
       robot_state::RobotState& robot_state = planning_scene->getCurrentStateNonConst();
-      planning_scene->setCurrentState(endResponse.trajectory_start);
+      planning_scene->setCurrentState(midResponse.trajectory_start);
       int positionInVector = 0;
       std::vector<double> finalPositions = getFinalJointPositions(goal.trajectory);
       for(auto joint_name : goal.trajectory.joint_trajectory.joint_names){

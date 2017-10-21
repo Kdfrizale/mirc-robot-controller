@@ -61,6 +61,15 @@ int main(int argc, char **argv)
     msg.poseLink6 = sensedPoseLink6;
     msg.poseTip1 = sensedPoseTip1;
 
+    ROS_INFO("tip1 X: [%f]", sensedPoseTip1.pose.position.x);
+    ROS_INFO("tip2 X: [%f]", sensedPoseTip2.pose.position.x);
+    ROS_INFO("palm X: [%f]", sensedPoseLink6.pose.position.x);
+
+    ROS_INFO("tip1 orientation X: [%f]", sensedPoseTip1.pose.orientation.x);
+    ROS_INFO("tip2 orientation X: [%f]", sensedPoseTip2.pose.orientation.x);
+    ROS_INFO("palm orientation X: [%f]", sensedPoseLink6.pose.orientation.x);
+
+
   //  sensor_msgs::JointState msg;
   //  msg.name.push_back("j2n6s300_joint_1");
   //  msg.position.push_back(rand() %10);
