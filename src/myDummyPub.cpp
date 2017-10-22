@@ -20,13 +20,13 @@ int main(int argc, char **argv)
 
   geometry_msgs::PoseStamped sensedPoseTip2;//Right Finger tip---Demo data
   sensedPoseTip2.header.frame_id = "m1n6s200_link_base";
-  sensedPoseTip2.pose.position.x = 0.365256;
-  sensedPoseTip2.pose.position.y = 0.257055;
-  sensedPoseTip2.pose.position.z = 0.678096;
-  sensedPoseTip2.pose.orientation.x = 0.688917;
-  sensedPoseTip2.pose.orientation.y = 0.0594181;
-  sensedPoseTip2.pose.orientation.z = 0.533242;
-  sensedPoseTip2.pose.orientation.w = 0.487356;
+  sensedPoseTip2.pose.position.x = 0.247616;
+  sensedPoseTip2.pose.position.y = 0.180879;
+  sensedPoseTip2.pose.position.z = 0.653225;
+  sensedPoseTip2.pose.orientation.x = 0.704808;
+  sensedPoseTip2.pose.orientation.y = 0.0573433;
+  sensedPoseTip2.pose.orientation.z = 0.704747;
+  sensedPoseTip2.pose.orientation.w = 0.0573497;
 
   geometry_msgs::PoseStamped sensedPoseLink6;//wrist --- Demo Data
   sensedPoseLink6.header.frame_id = "m1n6s200_link_base";
@@ -40,13 +40,13 @@ int main(int argc, char **argv)
 
   geometry_msgs::PoseStamped sensedPoseTip1;//Left Finger tip---Demo data
   sensedPoseTip1.header.frame_id = "m1n6s200_link_base";
-  sensedPoseTip1.pose.position.x = 0.350583;
-  sensedPoseTip1.pose.position.y = 0.240098;
-  sensedPoseTip1.pose.position.z = 0.708247;
-  sensedPoseTip1.pose.orientation.x = -0.641598;
-  sensedPoseTip1.pose.orientation.y = -0.331987;
-  sensedPoseTip1.pose.orientation.z = 0.293815;
-  sensedPoseTip1.pose.orientation.w = 0.625947;
+  sensedPoseTip1.pose.position.x = 0.247615;
+  sensedPoseTip1.pose.position.y = 0.103661;
+  sensedPoseTip1.pose.position.z = 0.653269;
+  sensedPoseTip1.pose.orientation.x = 0.0181078;
+  sensedPoseTip1.pose.orientation.y = -0.706845;
+  sensedPoseTip1.pose.orientation.z = -0.0181207;
+  sensedPoseTip1.pose.orientation.w = 0.706905;
 
   while (ros::ok()){
     sensedPoseTip2.pose.position.y += 0.001;

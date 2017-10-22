@@ -183,7 +183,36 @@ int main(int argc, char** argv)
       planning_interface::MotionPlanResponse res;
       planning_interface::MotionPlanRequest req2;
       planning_interface::MotionPlanResponse res2;
+      planning_interface::MotionPlanRequest req3;
+      planning_interface::MotionPlanResponse res3;
 
+      req3.group_name = "chainArmEnd";
+      moveit_msgs::Constraints pose_goal_end = kinematic_constraints::constructGoalConstraints("m1n6s200_end_effector", poseLink6, tolerance_pose, tolerance_angle);
+      req3.goal_constraints.push_back(pose_goal_end);
+
+      ROS_INFO("about to start planning");
+      planning_pipeline->generatePlan(planning_scene,req3,res3);
+
+      if (res3.error_code_.val != res3.error_code_.SUCCESS){
+        ROS_ERROR("Could not compute plan successfully");
+        waitForError.sleep();
+        continue;//Go back and get new poseTarget
+      }
+
+      moveit_msgs::MotionPlanResponse firstResponse;
+      res3.getMessage(firstResponse);//Get the first motion plan
+
+
+      /* First, set the state in the planning scene to the final state of the last plan */
+      robot_state::RobotState& robot_state = planning_scene->getCurrentStateNonConst();
+      planning_scene->setCurrentState(firstResponse.trajectory_start);
+      const robot_state::JointModelGroup* joint_model_group = robot_state.getJointModelGroup("chainArmEnd");
+      robot_state.setJointGroupPositions(joint_model_group, firstResponse.trajectory.joint_trajectory.points.back().positions);
+
+      duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+      ROS_INFO("It took [%f] seconds to get past the first plan", duration);
+
+//------------------------------------------------------------------------------------
       req.group_name = "chainArm";
       moveit_msgs::Constraints pose_goal_tip_2 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_finger_tip_2", poseTip2, tolerance_pose, tolerance_angle);
       req.goal_constraints.push_back(pose_goal_tip_2);
@@ -206,10 +235,10 @@ int main(int argc, char** argv)
 
 
       /* First, set the state in the planning scene to the final state of the last plan */
-    //  robot_state::RobotState& robot_state_mid = planning_scene->getCurrentStateNonConst();
-    //  planning_scene->setCurrentState(midResponse.trajectory_start);
-    //  const robot_state::JointModelGroup* joint_model_group_mid = robot_state_mid.getJointModelGroup("chainArm");
-      //robot_state_mid.setJointGroupPositions(joint_model_group_mid, midResponse.trajectory.joint_trajectory.points.back().positions);
+      robot_state = planning_scene->getCurrentStateNonConst();
+      planning_scene->setCurrentState(midResponse.trajectory_start);
+      joint_model_group = robot_state.getJointModelGroup("chainArm");
+      robot_state.setJointGroupPositions(joint_model_group, midResponse.trajectory.joint_trajectory.points.back().positions);
 
       duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
       ROS_INFO("It took [%f] seconds to get past the first plan", duration);
@@ -235,30 +264,13 @@ int main(int argc, char** argv)
       res2.getMessage(endResponse);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////
-      //Move the physical robot to the planned coordinates
-      //////////////////////////////////////////////////////////////////////////////////////////////////////
-      moveit_msgs::ExecuteTrajectoryGoal goal;
-      //goal.trajectory = midResponse.trajectory;
-      goal.trajectory = combineTrajectories(midResponse.trajectory, endResponse.trajectory);
-
-      actionlib::SimpleActionClient<moveit_msgs::ExecuteTrajectoryAction> ac("execute_trajectory",false);
-      ROS_INFO("Waiting for action server to start.");
-      ac.waitForServer();
-
-      ac.sendGoal(goal);
-      bool finished_before_timeout2 = ac.waitForResult(ros::Duration(30.0));
-      if (finished_before_timeout2){
-        actionlib::SimpleClientGoalState state = ac.getState();
-        ROS_INFO("Action finished: %s",state.toString().c_str());
-      }
-      else{
-        ROS_INFO("Action did not finish before the time out.");
-      }
-
-      //////////////////////////////////////////////////////////////////////////////////////////////////////
       //Update the Planning Scene Robot Model to show where the plans ended
       //////////////////////////////////////////////////////////////////////////////////////////////////////
-      robot_state::RobotState& robot_state = planning_scene->getCurrentStateNonConst();
+      robot_state = planning_scene->getCurrentStateNonConst();
+      planning_scene->setCurrentState(endResponse.trajectory_start);
+      joint_model_group = robot_state.getJointModelGroup("chainArmLeft");
+      robot_state.setJointGroupPositions(joint_model_group, endResponse.trajectory.joint_trajectory.points.back().positions);
+    /*  robot_state::RobotState& robot_state = planning_scene->getCurrentStateNonConst();
       planning_scene->setCurrentState(midResponse.trajectory_start);
       int positionInVector = 0;
       std::vector<double> finalPositions = getFinalJointPositions(goal.trajectory);
@@ -274,6 +286,41 @@ int main(int argc, char** argv)
         positionInVector++;
       }
       planning_scene->setCurrentState(robot_state);
+*/
+
+      //////////////////////////////////////////////////////////////////////////////////////////////////////
+      //Move the physical robot to the planned coordinates
+      //////////////////////////////////////////////////////////////////////////////////////////////////////
+      moveit_msgs::ExecuteTrajectoryGoal goal;
+      goal.trajectory = midResponse.trajectory;
+      //goal.trajectory = combineTrajectories(midResponse.trajectory, endResponse.trajectory);
+
+      actionlib::SimpleActionClient<moveit_msgs::ExecuteTrajectoryAction> ac("execute_trajectory",false);
+      ROS_INFO("Waiting for action server to start.");
+      ac.waitForServer();
+
+      ac.sendGoal(goal);
+      bool finished_before_timeout = ac.waitForResult(ros::Duration(30.0));
+      if (finished_before_timeout){
+        actionlib::SimpleClientGoalState state = ac.getState();
+        ROS_INFO("Action finished: %s",state.toString().c_str());
+      }
+      else{
+        ROS_INFO("Action did not finish before the time out.");
+      }
+
+      moveit_msgs::ExecuteTrajectoryGoal goal2;
+      goal2.trajectory = endResponse.trajectory;
+
+      ac.sendGoal(goal2);
+      bool finished_before_timeout2 = ac.waitForResult(ros::Duration(30.0));
+      if (finished_before_timeout2){
+        actionlib::SimpleClientGoalState state = ac.getState();
+        ROS_INFO("Action finished: %s",state.toString().c_str());
+      }
+      else{
+        ROS_INFO("Action did not finish before the time out.");
+      }
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////
       //show the result in Rviz
@@ -288,6 +335,8 @@ int main(int argc, char** argv)
       display_trajectory.trajectory_start = midResponse.trajectory_start;
       display_trajectory.trajectory.push_back(goal.trajectory);
 
+      display_trajectory.trajectory_start = endResponse.trajectory_start;
+      display_trajectory.trajectory.push_back(goal2.trajectory);
       /*
       res2.getMessage(response);//Get the second motion plan
       display_trajectory.trajectory_start = response.trajectory_start;
