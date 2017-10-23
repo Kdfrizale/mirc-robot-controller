@@ -30,19 +30,19 @@ int main(int argc, char **argv)
 
   geometry_msgs::PoseStamped sensedPoseLink6;//wrist --- Demo Data
   sensedPoseLink6.header.frame_id = "m1n6s200_link_base";
-  sensedPoseLink6.pose.position.x = 0.308219;
-  sensedPoseLink6.pose.position.y = 0.0494515;
-  sensedPoseLink6.pose.position.z = 0.727438;
-  sensedPoseLink6.pose.orientation.x = 0.615034;
-  sensedPoseLink6.pose.orientation.y = 0.0;
-  sensedPoseLink6.pose.orientation.z = 0.0;
-  sensedPoseLink6.pose.orientation.w = 0.788501;
+  sensedPoseLink6.pose.position.x = 0.155941;
+  sensedPoseLink6.pose.position.y = 0.166744;
+  sensedPoseLink6.pose.position.z = 0.854475;
+  sensedPoseLink6.pose.orientation.x = 0.000000;
+  sensedPoseLink6.pose.orientation.y = 0.000000;
+  sensedPoseLink6.pose.orientation.z = 0.000000;
+  sensedPoseLink6.pose.orientation.w = 1;
 
   geometry_msgs::PoseStamped sensedPoseTip1;//Left Finger tip---Demo data
   sensedPoseTip1.header.frame_id = "m1n6s200_link_base";
   sensedPoseTip1.pose.position.x = 0.247615;
   sensedPoseTip1.pose.position.y = 0.103661;
-  sensedPoseTip1.pose.position.z = 0.653269;
+  sensedPoseTip1.pose.position.z = 0.453269;
   sensedPoseTip1.pose.orientation.x = 0.0181078;
   sensedPoseTip1.pose.orientation.y = -0.706845;
   sensedPoseTip1.pose.orientation.z = -0.0181207;

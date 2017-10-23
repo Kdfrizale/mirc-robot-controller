@@ -25,6 +25,7 @@
 #include <string>
 #include <std_msgs/Float64.h>
 #include <vector>
+#include <cmath>
 
 /////////////////////////////////////////GLOBALS//////////////////////////////////////////////
 geometry_msgs::PoseStamped poseTip2;//Right Finger tip
@@ -34,8 +35,8 @@ bool messageReceived = false;
 
 // A tolerance of 0.01 m is specified in position
 // and 0.01 radians in orientation
-std::vector<double> tolerance_pose(3, 0.001);
-std::vector<double> tolerance_angle(4, 0.001);//0.01 is normal
+std::vector<double> tolerance_pose(3, 0.01);
+std::vector<double> tolerance_angle(3, 0.01);//0.01 is normal
 
 
 /////////////////////////////////////FUNCTIONS/////////////////////////////////////////////
@@ -47,6 +48,24 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   poseTip1 = msg->poseTip1;
   messageReceived = true;
 }
+
+double getDistanceBetweenPoints(geometry_msgs::PoseStamped pose1, geometry_msgs::PoseStamped pose2){
+  double result = 0.0;
+  double intermediateDistance = 0.0;
+  double xDistance =fabs(pose1.pose.position.x - pose2.pose.position.x);
+  double yDistance =fabs(pose1.pose.position.y - pose2.pose.position.y);
+  double zDistance =fabs(pose1.pose.position.z - pose2.pose.position.z);
+  ROS_INFO("the xDistance is: [%f]", xDistance);
+  ROS_INFO("the yDistance is: [%f]", yDistance);
+  ROS_INFO("the zDistance is: [%f]", zDistance);
+
+  intermediateDistance = sqrt(pow(xDistance,2) + pow(yDistance,2));
+  ROS_INFO("the intermediateDistance is: [%f]", intermediateDistance);
+  result = sqrt(pow(intermediateDistance,2) + pow(zDistance,2));
+  ROS_INFO("the final distance is: [%f]", result);
+  return result;
+}
+
 
 //Combines two trajectories so that the action server can have just one move for two plans
 moveit_msgs::RobotTrajectory combineTrajectories(const moveit_msgs::RobotTrajectory mainTrajectory, const moveit_msgs::RobotTrajectory secondaryTrajectory){
@@ -181,26 +200,24 @@ int main(int argc, char** argv)
       //////////////////////////////////////////////////////////////////////////////////////////////////////
       planning_interface::MotionPlanRequest req;
       planning_interface::MotionPlanResponse res;
-      planning_interface::MotionPlanRequest req2;
-      planning_interface::MotionPlanResponse res2;
-      planning_interface::MotionPlanRequest req3;
-      planning_interface::MotionPlanResponse res3;
 
-      req3.group_name = "chainArmEnd";
+      getDistanceBetweenPoints(poseTip1,poseTip2);
+
+      req.group_name = "chainArmEnd";
       moveit_msgs::Constraints pose_goal_end = kinematic_constraints::constructGoalConstraints("m1n6s200_end_effector", poseLink6, tolerance_pose, tolerance_angle);
-      req3.goal_constraints.push_back(pose_goal_end);
+      req.goal_constraints.push_back(pose_goal_end);
 
       ROS_INFO("about to start planning");
-      planning_pipeline->generatePlan(planning_scene,req3,res3);
+      planning_pipeline->generatePlan(planning_scene,req,res);
 
-      if (res3.error_code_.val != res3.error_code_.SUCCESS){
+      if (res.error_code_.val != res.error_code_.SUCCESS){
         ROS_ERROR("Could not compute plan successfully");
         waitForError.sleep();
         continue;//Go back and get new poseTarget
       }
 
       moveit_msgs::MotionPlanResponse firstResponse;
-      res3.getMessage(firstResponse);//Get the first motion plan
+      res.getMessage(firstResponse);//Get the first motion plan
 
 
       /* First, set the state in the planning scene to the final state of the last plan */
@@ -212,6 +229,21 @@ int main(int argc, char** argv)
       duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
       ROS_INFO("It took [%f] seconds to get past the first plan", duration);
 
+      //Calculate Finger joint postions here, dont forget to update model in planning scene
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 //------------------------------------------------------------------------------------
       req.group_name = "chainArm";
       moveit_msgs::Constraints pose_goal_tip_2 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_finger_tip_2", poseTip2, tolerance_pose, tolerance_angle);
@@ -233,8 +265,9 @@ int main(int argc, char** argv)
       moveit_msgs::MotionPlanResponse midResponse;
       res.getMessage(midResponse);//Get the first motion plan
 
-
+*/
       /* First, set the state in the planning scene to the final state of the last plan */
+      /*
       robot_state = planning_scene->getCurrentStateNonConst();
       planning_scene->setCurrentState(midResponse.trajectory_start);
       joint_model_group = robot_state.getJointModelGroup("chainArm");
@@ -269,7 +302,9 @@ int main(int argc, char** argv)
       robot_state = planning_scene->getCurrentStateNonConst();
       planning_scene->setCurrentState(endResponse.trajectory_start);
       joint_model_group = robot_state.getJointModelGroup("chainArmLeft");
+
       robot_state.setJointGroupPositions(joint_model_group, endResponse.trajectory.joint_trajectory.points.back().positions);
+      */
     /*  robot_state::RobotState& robot_state = planning_scene->getCurrentStateNonConst();
       planning_scene->setCurrentState(midResponse.trajectory_start);
       int positionInVector = 0;
@@ -292,7 +327,7 @@ int main(int argc, char** argv)
       //Move the physical robot to the planned coordinates
       //////////////////////////////////////////////////////////////////////////////////////////////////////
       moveit_msgs::ExecuteTrajectoryGoal goal;
-      goal.trajectory = midResponse.trajectory;
+      goal.trajectory = firstResponse.trajectory;
       //goal.trajectory = combineTrajectories(midResponse.trajectory, endResponse.trajectory);
 
       actionlib::SimpleActionClient<moveit_msgs::ExecuteTrajectoryAction> ac("execute_trajectory",false);
@@ -302,19 +337,6 @@ int main(int argc, char** argv)
       ac.sendGoal(goal);
       bool finished_before_timeout = ac.waitForResult(ros::Duration(30.0));
       if (finished_before_timeout){
-        actionlib::SimpleClientGoalState state = ac.getState();
-        ROS_INFO("Action finished: %s",state.toString().c_str());
-      }
-      else{
-        ROS_INFO("Action did not finish before the time out.");
-      }
-
-      moveit_msgs::ExecuteTrajectoryGoal goal2;
-      goal2.trajectory = endResponse.trajectory;
-
-      ac.sendGoal(goal2);
-      bool finished_before_timeout2 = ac.waitForResult(ros::Duration(30.0));
-      if (finished_before_timeout2){
         actionlib::SimpleClientGoalState state = ac.getState();
         ROS_INFO("Action finished: %s",state.toString().c_str());
       }
@@ -332,11 +354,11 @@ int main(int argc, char** argv)
       //moveit_msgs::MotionPlanResponse response;
 
       //res.getMessage(response);//Get the first motion plan
-      display_trajectory.trajectory_start = midResponse.trajectory_start;
+      display_trajectory.trajectory_start = firstResponse.trajectory_start;
       display_trajectory.trajectory.push_back(goal.trajectory);
 
-      display_trajectory.trajectory_start = endResponse.trajectory_start;
-      display_trajectory.trajectory.push_back(goal2.trajectory);
+      //display_trajectory.trajectory_start = endResponse.trajectory_start;
+      //display_trajectory.trajectory.push_back(goal2.trajectory);
       /*
       res2.getMessage(response);//Get the second motion plan
       display_trajectory.trajectory_start = response.trajectory_start;
