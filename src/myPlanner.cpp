@@ -44,6 +44,9 @@ std::string moveitTrajectoryActionServer = "execute_trajectory";
 std::string trajectoryActionServer = "/m1n6s200/follow_joint_trajectory";
 std::string fingersPositionActionServer = "finger_positions";//might be /m16s200_driver/fingers_action/finger_positions
 
+double distanceBetweenFingersBase = 0.080;//80mm
+double lengthOfFingers = 0.150;//150mm
+double fingersAngleOffset = 60; //60 degrees
 
 /////////////////////////////////////FUNCTIONS/////////////////////////////////////////////
 //Sets the desired poseTargets to the received input poses
@@ -236,8 +239,8 @@ int main(int argc, char** argv)
 
       //Calculate Finger joint postions here, dont forget to update model in planning scene
 
-
-
+      //DesiredDistanceApart = DistanceBetweenFingersBase + 2* LengthOfFinger*cos(JointPosition*60degrees +StationaryAngleDegreeOffset)
+      //cos only does radians, so need to convert to degrees with equation -> cos(degrees * pi/180)
 
 
 
