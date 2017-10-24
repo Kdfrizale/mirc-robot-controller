@@ -40,6 +40,10 @@ bool messageReceived = false;
 std::vector<double> tolerance_pose(3, 0.01);
 std::vector<double> tolerance_angle(3, 0.01);//0.01 is normal
 
+std::string moveitTrajectoryActionServer = "execute_trajectory";
+std::string trajectoryActionServer = "/m1n6s200/follow_joint_trajectory";
+std::string fingersPositionActionServer = "finger_positions";//might be /m16s200_driver/fingers_action/finger_positions
+
 
 /////////////////////////////////////FUNCTIONS/////////////////////////////////////////////
 //Sets the desired poseTargets to the received input poses
@@ -331,7 +335,7 @@ int main(int argc, char** argv)
       goal.trajectory = firstResponse.trajectory;
       //goal.trajectory = combineTrajectories(midResponse.trajectory, endResponse.trajectory);
 
-      actionlib::SimpleActionClient<moveit_msgs::ExecuteTrajectoryAction> ac("execute_trajectory",false);
+      actionlib::SimpleActionClient<moveit_msgs::ExecuteTrajectoryAction> ac(moveitTrajectoryActionServer,false);
       ROS_INFO("Waiting for action server to start.");
       ac.waitForServer();
 
@@ -344,6 +348,28 @@ int main(int argc, char** argv)
       else{
         ROS_INFO("Action did not finish before the time out.");
       }
+
+      //May need to have a wait statement here so the fingers move last, not at the same time
+      //Now to move the fingers
+      kinova_msgs::SetFingersPositionGoal fingerGoal;
+      //kinova_msgs::FingerPosition fingers;
+      fingerGoal.fingers.finger1 = 1.0;
+      fingerGoal.fingers.finger2 = 1.0; //should be halfway closed
+
+      actionlib::SimpleActionClient<kinova_msgs::SetFingersPositionAction> ac2(fingersPositionActionServer,false);
+      ROS_INFO("Waiting for action server to start.");
+      ac2.waitForServer();
+
+      ac2.sendGoal(fingerGoal);
+      bool finished_before_timeout2 = ac2.waitForResult(ros::Duration(30.0));
+      if (finished_before_timeout2){
+        actionlib::SimpleClientGoalState state2 = ac2.getState();
+        ROS_INFO("Action finished: %s",state2.toString().c_str());
+      }
+      else{
+        ROS_INFO("Action did not finish before the time out.");
+      }
+
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////
       //show the result in Rviz
