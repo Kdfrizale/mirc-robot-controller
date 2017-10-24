@@ -12,6 +12,8 @@
 #include <moveit_msgs/RobotTrajectory.h>
 #include <moveit_msgs/ExecuteTrajectoryAction.h>
 #include <moveit_msgs/ExecuteTrajectoryGoal.h>
+#include <kinova_msgs/SetFingersPositionAction.h>
+#include <kinova_msgs/SetFingersPositionGoal.h>
 #include <boost/scoped_ptr.hpp>
 
 #include <ctime>
@@ -29,7 +31,7 @@
 
 /////////////////////////////////////////GLOBALS//////////////////////////////////////////////
 geometry_msgs::PoseStamped poseTip2;//Right Finger tip
-geometry_msgs::PoseStamped poseLink6;//wrist
+geometry_msgs::PoseStamped posePalm;//wrist
 geometry_msgs::PoseStamped poseTip1;//Left Finger tip
 bool messageReceived = false;
 
@@ -44,7 +46,7 @@ std::vector<double> tolerance_angle(3, 0.01);//0.01 is normal
 void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   ROS_INFO_THROTTLE(1,"I received a message.. now processing...");
   poseTip2 = msg->poseTip2;
-  poseLink6 = msg->poseLink6;
+  posePalm = msg->posePalm;
   poseTip1 = msg->poseTip1;
   messageReceived = true;
 }
@@ -164,7 +166,6 @@ int main(int argc, char** argv)
   robot_model::RobotModelPtr robot_model = robot_model_loader.getModel();
 
   planning_scene::PlanningScenePtr planning_scene(new planning_scene::PlanningScene(robot_model));
-  planning_scene::PlanningScenePtr planning_scene2(new planning_scene::PlanningScene(robot_model));
 
   planning_pipeline::PlanningPipelinePtr planning_pipeline(new planning_pipeline::PlanningPipeline(robot_model, node_handle, "planning_plugin", "request_adapters"));
 
@@ -204,7 +205,7 @@ int main(int argc, char** argv)
       getDistanceBetweenPoints(poseTip1,poseTip2);
 
       req.group_name = "chainArmEnd";
-      moveit_msgs::Constraints pose_goal_end = kinematic_constraints::constructGoalConstraints("m1n6s200_end_effector", poseLink6, tolerance_pose, tolerance_angle);
+      moveit_msgs::Constraints pose_goal_end = kinematic_constraints::constructGoalConstraints("m1n6s200_end_effector", posePalm, tolerance_pose, tolerance_angle);
       req.goal_constraints.push_back(pose_goal_end);
 
       ROS_INFO("about to start planning");
@@ -249,7 +250,7 @@ int main(int argc, char** argv)
       moveit_msgs::Constraints pose_goal_tip_2 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_finger_tip_2", poseTip2, tolerance_pose, tolerance_angle);
       req.goal_constraints.push_back(pose_goal_tip_2);
 
-      moveit_msgs::Constraints pose_goal_link6 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_6", poseLink6, tolerance_pose, tolerance_angle);
+      moveit_msgs::Constraints pose_goal_link6 = kinematic_constraints::constructGoalConstraints("m1n6s200_link_6", posePalm, tolerance_pose, tolerance_angle);
       req.goal_constraints.push_back(pose_goal_link6);
 
       ROS_INFO("about to start planning");

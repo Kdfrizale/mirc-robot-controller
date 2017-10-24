@@ -28,15 +28,15 @@ int main(int argc, char **argv)
   sensedPoseTip2.pose.orientation.z = 0.704747;
   sensedPoseTip2.pose.orientation.w = 0.0573497;
 
-  geometry_msgs::PoseStamped sensedPoseLink6;//wrist --- Demo Data
-  sensedPoseLink6.header.frame_id = "m1n6s200_link_base";
-  sensedPoseLink6.pose.position.x = 0.155941;
-  sensedPoseLink6.pose.position.y = 0.166744;
-  sensedPoseLink6.pose.position.z = 0.854475;
-  sensedPoseLink6.pose.orientation.x = 0.000000;
-  sensedPoseLink6.pose.orientation.y = 0.000000;
-  sensedPoseLink6.pose.orientation.z = 0.000000;
-  sensedPoseLink6.pose.orientation.w = 1;
+  geometry_msgs::PoseStamped sensedposePalm;//wrist --- Demo Data
+  sensedposePalm.header.frame_id = "m1n6s200_link_base";
+  sensedposePalm.pose.position.x = 0.155941;
+  sensedposePalm.pose.position.y = 0.166744;
+  sensedposePalm.pose.position.z = 0.854475;
+  sensedposePalm.pose.orientation.x = 0.000000;
+  sensedposePalm.pose.orientation.y = 0.000000;
+  sensedposePalm.pose.orientation.z = 0.000000;
+  sensedposePalm.pose.orientation.w = 1;
 
   geometry_msgs::PoseStamped sensedPoseTip1;//Left Finger tip---Demo data
   sensedPoseTip1.header.frame_id = "m1n6s200_link_base";
@@ -50,24 +50,24 @@ int main(int argc, char **argv)
 
   while (ros::ok()){
     sensedPoseTip2.pose.position.y += 0.001;
-    sensedPoseLink6.pose.position.y += 0.001;
+    sensedposePalm.pose.position.y += 0.001;
     sensedPoseTip1.pose.position.y += 0.001;
     sensedPoseTip2.pose.position.x += 0.001;
-    sensedPoseLink6.pose.position.x += 0.001;
+    sensedposePalm.pose.position.x += 0.001;
     sensedPoseTip1.pose.position.x += 0.001;
 
     arm_mimic_capstone::HandStampedPose msg;
     msg.poseTip2 = sensedPoseTip2;
-    msg.poseLink6 = sensedPoseLink6;
+    msg.posePalm = sensedposePalm;
     msg.poseTip1 = sensedPoseTip1;
 
     ROS_INFO("tip1 X: [%f]", sensedPoseTip1.pose.position.x);
     ROS_INFO("tip2 X: [%f]", sensedPoseTip2.pose.position.x);
-    ROS_INFO("palm X: [%f]", sensedPoseLink6.pose.position.x);
+    ROS_INFO("palm X: [%f]", sensedposePalm.pose.position.x);
 
     ROS_INFO("tip1 orientation X: [%f]", sensedPoseTip1.pose.orientation.x);
     ROS_INFO("tip2 orientation X: [%f]", sensedPoseTip2.pose.orientation.x);
-    ROS_INFO("palm orientation X: [%f]", sensedPoseLink6.pose.orientation.x);
+    ROS_INFO("palm orientation X: [%f]", sensedposePalm.pose.orientation.x);
 
 
   //  sensor_msgs::JointState msg;

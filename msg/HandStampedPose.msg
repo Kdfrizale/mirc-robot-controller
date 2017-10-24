@@ -1,4 +1,4 @@
 Header header
 geometry_msgs/PoseStamped poseTip2
-geometry_msgs/PoseStamped poseLink6
+geometry_msgs/PoseStamped posePalm
 geometry_msgs/PoseStamped poseTip1

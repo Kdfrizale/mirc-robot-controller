@@ -19,6 +19,8 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   geometric_shapes
   moveit_visual_tools
+  kinova_msgs
+  kinova_driver
 )
 
 
@@ -44,6 +46,7 @@ add_message_files(
 generate_messages(
   DEPENDENCIES
   geometry_msgs
+  kinova_msgs
 )
 
 
