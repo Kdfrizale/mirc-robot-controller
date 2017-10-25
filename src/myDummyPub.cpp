@@ -30,13 +30,13 @@ int main(int argc, char **argv)
 
   geometry_msgs::PoseStamped sensedposePalm;//wrist --- Demo Data
   sensedposePalm.header.frame_id = "m1n6s200_link_base";
-  sensedposePalm.pose.position.x = 0.155941;
-  sensedposePalm.pose.position.y = 0.166744;
-  sensedposePalm.pose.position.z = 0.854475;
-  sensedposePalm.pose.orientation.x = 0.000000;
-  sensedposePalm.pose.orientation.y = 0.000000;
-  sensedposePalm.pose.orientation.z = 0.000000;
-  sensedposePalm.pose.orientation.w = 1;
+  sensedposePalm.pose.position.x = 0.208181;
+  sensedposePalm.pose.position.y = -0.263388;
+  sensedposePalm.pose.position.z = 0.477839;
+  sensedposePalm.pose.orientation.x = 0.691519;
+  sensedposePalm.pose.orientation.y = -0.137231;
+  sensedposePalm.pose.orientation.z = 0.689269;
+  sensedposePalm.pose.orientation.w = 0.166966;
 
   geometry_msgs::PoseStamped sensedPoseTip1;//Left Finger tip---Demo data
   sensedPoseTip1.header.frame_id = "m1n6s200_link_base";

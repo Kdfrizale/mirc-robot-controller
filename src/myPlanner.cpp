@@ -41,8 +41,9 @@ std::vector<double> tolerance_pose(3, 0.01);
 std::vector<double> tolerance_angle(3, 0.01);//0.01 is normal
 
 std::string moveitTrajectoryActionServer = "execute_trajectory";
-std::string trajectoryActionServer = "/m1n6s200/follow_joint_trajectory";
-std::string fingersPositionActionServer = "finger_positions";//might be /m16s200_driver/fingers_action/finger_positions
+//std::string trajectoryActionServer = "/m1n6s200/follow_joint_trajectory";
+std::string trajectoryActionServer = "m1n6s200_driver/arm_controller/follow_joint_trajectory";
+std::string fingersPositionActionServer = "finger_positions";//might be /m1n6s200_driver/fingers_action/finger_positions
 
 double distanceBetweenFingersBase = 0.080;//80mm
 double lengthOfFingers = 0.150;//150mm
@@ -211,7 +212,7 @@ int main(int argc, char** argv)
 
       getDistanceBetweenPoints(poseTip1,poseTip2);
 
-      req.group_name = "chainArmEnd";
+      req.group_name = "arm";
       moveit_msgs::Constraints pose_goal_end = kinematic_constraints::constructGoalConstraints("m1n6s200_end_effector", posePalm, tolerance_pose, tolerance_angle);
       req.goal_constraints.push_back(pose_goal_end);
 
@@ -221,6 +222,7 @@ int main(int argc, char** argv)
       if (res.error_code_.val != res.error_code_.SUCCESS){
         ROS_ERROR("Could not compute plan successfully");
         waitForError.sleep();
+        //might also need to reset planning scene
         continue;//Go back and get new poseTarget
       }
 
@@ -231,7 +233,7 @@ int main(int argc, char** argv)
       /* First, set the state in the planning scene to the final state of the last plan */
       robot_state::RobotState& robot_state = planning_scene->getCurrentStateNonConst();
       planning_scene->setCurrentState(firstResponse.trajectory_start);
-      const robot_state::JointModelGroup* joint_model_group = robot_state.getJointModelGroup("chainArmEnd");
+      const robot_state::JointModelGroup* joint_model_group = robot_state.getJointModelGroup("arm");
       robot_state.setJointGroupPositions(joint_model_group, firstResponse.trajectory.joint_trajectory.points.back().positions);
 
       duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
@@ -338,7 +340,7 @@ int main(int argc, char** argv)
       goal.trajectory = firstResponse.trajectory;
       //goal.trajectory = combineTrajectories(midResponse.trajectory, endResponse.trajectory);
 
-      actionlib::SimpleActionClient<moveit_msgs::ExecuteTrajectoryAction> ac(moveitTrajectoryActionServer,false);
+      actionlib::SimpleActionClient<moveit_msgs::ExecuteTrajectoryAction> ac(trajectoryActionServer,false);
       ROS_INFO("Waiting for action server to start.");
       ac.waitForServer();
 
