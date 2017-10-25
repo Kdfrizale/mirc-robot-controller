@@ -77,5 +77,9 @@ add_executable(myPlanner src/myPlanner.cpp)
 target_link_libraries(myPlanner ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS myPlanner DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+add_executable(myMoveGroup src/myMoveGroup.cpp)
+target_link_libraries(myMoveGroup ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+install(TARGETS myMoveGroup DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
 add_executable(myDummyPub src/myDummyPub.cpp)
 target_link_libraries(myDummyPub ${catkin_LIBRARIES})
