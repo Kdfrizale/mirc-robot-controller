@@ -49,9 +49,10 @@ std::string moveitTrajectoryActionServer = "execute_trajectory";
 std::string trajectoryActionServer = "m1n6s200_driver/arm_controller/follow_joint_trajectory";
 std::string fingersPositionActionServer = "finger_positions";//might be /m1n6s200_driver/fingers_action/finger_positions
 
-double distanceBetweenFingersBase = 0.080;//80mm
-double lengthOfFingers = 0.150;//150mm
-double fingersAngleOffset = 60; //60 degrees
+const double distanceBetweenFingersBase = 0.080;//80mm
+const double lengthOfFingers = 0.150;//150mm
+const double fingersAngleOffset = 60; //60 degrees
+const double FINGER_MAX = 6400;
 
 /////////////////////////////////////FUNCTIONS/////////////////////////////////////////////
 //Sets the desired poseTargets to the received input poses
@@ -80,6 +81,8 @@ double getDistanceBetweenPoints(geometry_msgs::PoseStamped pose1, geometry_msgs:
   return result;
 }
 
+
+
 //////////////////////////////////////////////////////////////////MAIN//////////////////////////////////////////////////////////////////////
 int main(int argc, char** argv)
 {
@@ -91,6 +94,15 @@ int main(int argc, char** argv)
   static const std::string PLANNING_GROUP = "arm";
 
   moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
+  moveit::planning_interface::MoveGroupInterface gripper_group("gripper");
+  //gripper_group_ = new moveit::planning_interface::MoveGroup("gripper");
+  //move_group->setEndEffectorLink("m1n6s200_end_effector");
+
+  actionlib::SimpleActionClient<kinova_msgs::SetFingersPositionAction> finger_client("/m1n6s200_driver/fingers_action/finger_positions", false);
+  if (!finger_client.waitForServer(ros::Duration(5.0))){
+    ROS_INFO_THROTTLE(1,"Waiting for the finger action server to come up...");
+  }
+
   moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 
   const robot_state::JointModelGroup *joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
@@ -124,7 +136,7 @@ int main(int argc, char** argv)
       start = std::clock();
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////
-      //PLANNING
+      //PLANNING and MOVING
       //////////////////////////////////////////////////////////////////////////////////////////////////////
       getDistanceBetweenPoints(poseTip1,poseTip2);
 
@@ -135,14 +147,45 @@ int main(int argc, char** argv)
       moveit::planning_interface::MoveGroupInterface::Plan my_plan;
       bool success = move_group.plan(my_plan);
 
+      duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+      ROS_INFO("It took [%f] seconds to get past the arm plan", duration);
+
       if (success){
         move_group.move();
       }
 
-      waitForPlan_time.sleep();
-
       duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-      ROS_INFO("It took [%f] seconds to get past the rviz display", duration);
+      ROS_INFO("It took [%f] seconds to get past the arm move", duration);
+
+
+      //in simulation move fingers
+      //gripper_group.setNamedTarget("Close");
+      //gripper_group.move();
+
+      //move fingers to desired joint angle in safe maner
+      double finger_turn = 1;
+      if (finger_turn < 0){
+        finger_turn = 0.0;
+      }
+      else{
+        finger_turn = std::min(finger_turn, FINGER_MAX);
+      }
+
+      kinova_msgs::SetFingersPositionGoal fingerGoal;
+      fingerGoal.fingers.finger1 = finger_turn;
+      fingerGoal.fingers.finger2 = finger_turn;
+      finger_client.sendGoal(fingerGoal);
+
+      if (finger_client.waitForResult(ros::Duration(5.0))){
+        finger_client.getResult();
+        return true;
+      }
+      else{
+        finger_client.cancelAllGoals();
+        ROS_WARN_STREAM("The gripper action timed-out");
+        return false;
+      }
+
 
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////
