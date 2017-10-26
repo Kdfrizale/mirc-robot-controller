@@ -94,14 +94,14 @@ int main(int argc, char** argv)
   static const std::string PLANNING_GROUP = "arm";
 
   moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
-  moveit::planning_interface::MoveGroupInterface gripper_group("gripper");
+  //moveit::planning_interface::MoveGroupInterface gripper_group("gripper");
   //gripper_group_ = new moveit::planning_interface::MoveGroup("gripper");
   //move_group->setEndEffectorLink("m1n6s200_end_effector");
-
+  //
   actionlib::SimpleActionClient<kinova_msgs::SetFingersPositionAction> finger_client("/m1n6s200_driver/fingers_action/finger_positions", false);
-  if (!finger_client.waitForServer(ros::Duration(5.0))){
-    ROS_INFO_THROTTLE(1,"Waiting for the finger action server to come up...");
-  }
+  // if (!finger_client.waitForServer(ros::Duration(5.0))){
+  //   ROS_INFO_THROTTLE(1,"Waiting for the finger action server to come up...");
+  // }
 
   moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 
@@ -140,7 +140,7 @@ int main(int argc, char** argv)
       //////////////////////////////////////////////////////////////////////////////////////////////////////
       geometry_msgs::Pose desiredPose = posePalm.pose;
       move_group.setPoseTarget(desiredPose);
-      move_group.setPlanningTime(5);
+      //move_group.setPlanningTime(5);
 
       moveit::planning_interface::MoveGroupInterface::Plan my_plan;
       bool success = move_group.plan(my_plan);
@@ -148,9 +148,10 @@ int main(int argc, char** argv)
       duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
       ROS_INFO("It took [%f] seconds to get past the arm plan", duration);
 
-      if (success){
-        move_group.move();
-      }
+      move_group.move();
+      // if (success){
+      //   move_group.move();
+      // }
 
       duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
       ROS_INFO("It took [%f] seconds to get past the arm move", duration);
@@ -169,28 +170,31 @@ int main(int argc, char** argv)
       //gripper_group.move();
 
       //move fingers to desired joint angle in safe maner
-      double finger_turn = 1;//This should turn halfway
-      if (finger_turn < 0){
-        finger_turn = 0.0;
-      }
-      else{
-        finger_turn = std::min(finger_turn, FINGER_MAX);
-      }
-
+      double finger_turn = 3200;//This should turn halfway
+      // if (finger_turn < 0){
+      //   finger_turn = 0.0;
+      // }
+      // else{
+      //   finger_turn = std::min(finger_turn, FINGER_MAX);
+      // }
+      //
       kinova_msgs::SetFingersPositionGoal fingerGoal;
       fingerGoal.fingers.finger1 = finger_turn;
       fingerGoal.fingers.finger2 = finger_turn;
       finger_client.sendGoal(fingerGoal);
 
-      if (finger_client.waitForResult(ros::Duration(5.0))){
-        finger_client.getResult();
-        return true;
-      }
-      else{
-        finger_client.cancelAllGoals();
-        ROS_WARN_STREAM("The gripper action timed-out");
-        return false;
-      }
+      duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+      ROS_INFO("It took [%f] seconds to get past the finger move", duration);
+      //
+      // if (finger_client.waitForResult(ros::Duration(5.0))){
+      //   finger_client.getResult();
+      //   return true;
+      // }
+      // else{
+      //   finger_client.cancelAllGoals();
+      //   ROS_WARN_STREAM("The gripper action timed-out");
+      //   return false;
+      // }
 
 
 
