@@ -138,8 +138,6 @@ int main(int argc, char** argv)
       //////////////////////////////////////////////////////////////////////////////////////////////////////
       //PLANNING and MOVING
       //////////////////////////////////////////////////////////////////////////////////////////////////////
-      getDistanceBetweenPoints(poseTip1,poseTip2);
-
       geometry_msgs::Pose desiredPose = posePalm.pose;
       move_group.setPoseTarget(desiredPose);
       move_group.setPlanningTime(5);
@@ -158,12 +156,20 @@ int main(int argc, char** argv)
       ROS_INFO("It took [%f] seconds to get past the arm move", duration);
 
 
+
+      //Calculate Finger joint postions here, dont forget to update model in planning scene
+      double desiredDistanceApart = getDistanceBetweenPoints(poseTip1,poseTip2);
+      //DesiredDistanceApart = DistanceBetweenFingersBase + 2* LengthOfFinger*cos(JointPosition*60degrees +StationaryAngleDegreeOffset)
+      //cos only does radians, so need to convert to degrees with equation -> cos(degrees * pi/180)
+
+
+
       //in simulation move fingers
       //gripper_group.setNamedTarget("Close");
       //gripper_group.move();
 
       //move fingers to desired joint angle in safe maner
-      double finger_turn = 1;
+      double finger_turn = 1;//This should turn halfway
       if (finger_turn < 0){
         finger_turn = 0.0;
       }
