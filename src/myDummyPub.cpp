@@ -79,8 +79,8 @@ int main(int argc, char **argv)
     //msg.position = [2, 3.59, 7.01, 3.07];
 
     chatter_pub.publish(msg);
-    std::cout << "Press Enter to Continue" ;
-    getchar();
+    //std::cout << "Press Enter to Continue" ;
+    //getchar();
     //ROS_INFO("%s",msg.data.c_str());
     ros::spinOnce();
 

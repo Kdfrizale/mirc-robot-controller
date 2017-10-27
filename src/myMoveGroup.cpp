@@ -108,8 +108,8 @@ int main(int argc, char** argv)
 
   const robot_state::JointModelGroup *joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
 
-  ros::Publisher display_publisher = node_handle.advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, true);
-  moveit_msgs::DisplayTrajectory display_trajectory;
+  //ros::Publisher display_publisher = node_handle.advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, true);
+  //moveit_msgs::DisplayTrajectory display_trajectory;
 
   /* Sleep a little to allow time to startup rviz, etc. */
   ros::WallDuration sleep_time(15.0);
@@ -125,7 +125,7 @@ int main(int argc, char** argv)
     //get input Pose using subscriber--which calls updatesPoseValues
     //Only continue when a new pose is received
     //////////////////////////////////////////////////////////////////////////////////////////////////////
-    ros::Subscriber sub = node_handle.subscribe("/handPoseTopic",10,updatePoseValues);
+    ros::Subscriber sub = node_handle.subscribe("/handPoseTopic",1,updatePoseValues);
     if(!messageReceived){
       ROS_INFO_THROTTLE(1,"Message not Received...");
     }
@@ -139,28 +139,6 @@ int main(int argc, char** argv)
       //////////////////////////////////////////////////////////////////////////////////////////////////////
       //PLANNING and MOVING
       //////////////////////////////////////////////////////////////////////////////////////////////////////
-      geometry_msgs::Pose desiredPose = posePalm.pose;
-      move_group.setPoseTarget(desiredPose);
-      //move_group.setPlanningTime(5);
-
-      moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-      bool success = move_group.plan(my_plan);
-
-      duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-      ROS_INFO("It took [%f] seconds to get past the arm plan", duration);
-
-      move_group.move();
-      //move_group.execute(my_plan);
-      ROS_INFO("This shouldn't appear until after the robot has finished moving..");
-      //Could add a check to check that all the published joints have remained the same to verify move is over?
-      // if (success){
-      //   move_group.move();
-      // }
-
-      duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-      ROS_INFO("It took [%f] seconds to get past the arm move", duration);
-
-
 
       //Calculate Finger joint postions here, dont forget to update model in planning scene
       double desiredDistanceApart = getDistanceBetweenPoints(poseTip1,poseTip2);
@@ -191,10 +169,38 @@ int main(int argc, char** argv)
       kinova_msgs::SetFingersPositionGoal fingerGoal;
       fingerGoal.fingers.finger1 = finger_turn;
       fingerGoal.fingers.finger2 = finger_turn;
-      finger_client.sendGoal(fingerGoal);
+      //finger_client.sendGoal(fingerGoal);
 
       duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
       ROS_INFO("It took [%f] seconds to get past the finger move", duration);
+
+
+
+
+      geometry_msgs::Pose desiredPose = posePalm.pose;
+      move_group.setPoseTarget(desiredPose);
+      //move_group.setPlanningTime(5);
+
+      moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+      bool success = move_group.plan(my_plan);
+
+      duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+      ROS_INFO("It took [%f] seconds to get past the arm plan", duration);
+
+      move_group.move();
+      //move_group.execute(my_plan);
+      ROS_INFO("This shouldn't appear until after the robot has finished moving..");
+      //Could add a check to check that all the published joints have remained the same to verify move is over?
+      // if (success){
+      //   move_group.move();
+      // }
+
+      duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+      ROS_INFO("It took [%f] seconds to get past the arm move", duration);
+
+
+
+
       //
       // if (finger_client.waitForResult(ros::Duration(5.0))){
       //   finger_client.getResult();
