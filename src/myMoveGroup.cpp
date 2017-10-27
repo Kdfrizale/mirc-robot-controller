@@ -49,8 +49,8 @@ std::string moveitTrajectoryActionServer = "execute_trajectory";
 std::string trajectoryActionServer = "m1n6s200_driver/arm_controller/follow_joint_trajectory";
 std::string fingersPositionActionServer = "finger_positions";//might be /m1n6s200_driver/fingers_action/finger_positions
 
-const double distanceBetweenFingersBase = 0.080;//80mm
-const double lengthOfFingers = 0.150;//150mm
+const double distanceBetweenFingersBase = 0.0625;//6.25cm
+const double lengthOfFingers = 0.09;//9cm
 const double fingersAngleOffset = 60; //60 degrees
 const double FINGER_MAX = 6400;
 
