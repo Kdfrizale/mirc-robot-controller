@@ -53,6 +53,7 @@ const double distanceBetweenFingersBase = 0.0625;//6.25cm
 const double lengthOfFingers = 0.09;//9cm
 const double fingersAngleOffset = 60; //60 degrees
 const double FINGER_MAX = 6400;
+const double distanceBetweenFingerTipsFullOpen = 0.10; //10cm
 
 /////////////////////////////////////FUNCTIONS/////////////////////////////////////////////
 //Sets the desired poseTargets to the received input poses
@@ -162,22 +163,26 @@ int main(int argc, char** argv)
       double desiredDistanceApart = getDistanceBetweenPoints(poseTip1,poseTip2);
       //DesiredDistanceApart = DistanceBetweenFingersBase + 2* LengthOfFinger*cos(JointPosition*60degrees +StationaryAngleDegreeOffset)
       //cos only does radians, so need to convert to degrees with equation -> cos(degrees * pi/180)
-
-
+      //above wont work due to the finger possiblitiles being 0 to 6400 instead of 0 to 2
 
       //in simulation move fingers
       //gripper_group.setNamedTarget("Close");
       //gripper_group.move();
 
       //move fingers to desired joint angle in safe maner
-      double finger_turn = 3200;//This should turn halfway
-      // if (finger_turn < 0){
-      //   finger_turn = 0.0;
-      // }
-      // else{
-      //   finger_turn = std::min(finger_turn, FINGER_MAX);
-      // }
-      //
+      double ratioClosed = desiredDistanceApart / distanceBetweenFingerTipsFullOpen;
+      //double finger_turn = 3200;//This should turn halfway-demo data
+      double finger_turn = ratioClosed * FINGER_MAX;
+      ROS_INFO("Calculated finger_turn is : [%f]", finger_turn);
+
+      if (finger_turn < 0){
+        finger_turn = 0.0;
+      }
+      else{
+        finger_turn = std::min(finger_turn, FINGER_MAX);
+      }
+
+      ROS_INFO("Final finger_turn is : [%f]", finger_turn);
       kinova_msgs::SetFingersPositionGoal fingerGoal;
       fingerGoal.fingers.finger1 = finger_turn;
       fingerGoal.fingers.finger2 = finger_turn;
