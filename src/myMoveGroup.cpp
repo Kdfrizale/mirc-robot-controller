@@ -53,7 +53,7 @@ const double distanceBetweenFingersBase = 0.0625;//6.25cm
 const double lengthOfFingers = 0.09;//9cm
 const double fingersAngleOffset = 60; //60 degrees
 const double FINGER_MAX = 6400;
-const double distanceBetweenFingerTipsFullOpen = 0.10; //10cm
+const double distanceBetweenFingerTipsFullOpen = 0.18; //10cm
 
 /////////////////////////////////////FUNCTIONS/////////////////////////////////////////////
 //Sets the desired poseTargets to the received input poses
