@@ -53,7 +53,7 @@ const double distanceBetweenFingersBase = 0.0625;//6.25cm
 const double lengthOfFingers = 0.09;//9cm
 const double fingersAngleOffset = 60; //60 degrees
 const double FINGER_MAX = 6400;
-const double distanceBetweenFingerTipsFullOpen = 0.18; //10cm
+const double distanceBetweenFingerTipsFullOpen = 0.135623; //103cm
 
 /////////////////////////////////////FUNCTIONS/////////////////////////////////////////////
 //Sets the desired poseTargets to the received input poses
@@ -150,6 +150,9 @@ int main(int argc, char** argv)
       ROS_INFO("It took [%f] seconds to get past the arm plan", duration);
 
       move_group.move();
+      //move_group.execute(my_plan);
+      ROS_INFO("This shouldn't appear until after the robot has finished moving..");
+      //Could add a check to check that all the published joints have remained the same to verify move is over?
       // if (success){
       //   move_group.move();
       // }
@@ -171,6 +174,7 @@ int main(int argc, char** argv)
 
       //move fingers to desired joint angle in safe maner
       double ratioClosed = desiredDistanceApart / distanceBetweenFingerTipsFullOpen;
+      ratioClosed = 1 -ratioClosed; //flip the scale around as 6400 is closed, and 0 is open
       //double finger_turn = 3200;//This should turn halfway-demo data
       double finger_turn = ratioClosed * FINGER_MAX;
       ROS_INFO("Calculated finger_turn is : [%f]", finger_turn);
@@ -182,6 +186,7 @@ int main(int argc, char** argv)
         finger_turn = std::min(finger_turn, FINGER_MAX);
       }
 
+      //sleep_time.sleep();//give time for the robot to move to the desired goal
       ROS_INFO("Final finger_turn is : [%f]", finger_turn);
       kinova_msgs::SetFingersPositionGoal fingerGoal;
       fingerGoal.fingers.finger1 = finger_turn;
