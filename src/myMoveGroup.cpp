@@ -62,7 +62,7 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   poseTip2 = msg->poseTip2;
   posePalm = msg->posePalm;
   poseTip1 = msg->poseTip1;
-  posePalm.pose.position.y = posePalm.pose.position.y - 0.3; //offset for the arm not to be at origin
+  posePalm.pose.position.y = posePalm.pose.position.y - 0.3; //offset for the arm not to be at origin --.46
   posePalm.pose.position.z = posePalm.pose.position.z + 0.15; //offset to give more vertical
   messageReceived = true;
 }
@@ -168,7 +168,22 @@ int main(int argc, char** argv)
 
       //Wait here until the arm has stopped moving
       //aka until the joints have remained the same for a period of time
-
+      bool finishedMoving = false;
+      //const robot_state::JointModelGroup *joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+      geometry_msgs::PoseStamped oldEEPose = move_group.getCurrentPose("m1n6s200_end_effector");
+      geometry_msgs::PoseStamped newEEPose = move_group.getCurrentPose("m1n6s200_end_effector");
+      ROS_INFO("end effector pose is: [%f]", oldEEPose.pose.position.x);
+      while (!finishedMoving){
+        waitForPlan_time.sleep();
+        newEEPose = move_group.getCurrentPose("m1n6s200_end_effector");
+        if (newEEPose.pose.position.x == oldEEPose.pose.position.x &&
+          newEEPose.pose.position.y == oldEEPose.pose.position.y &&
+          newEEPose.pose.position.z == oldEEPose.pose.position.z
+        ) {
+          ROS_INFO("im in the while, but not anymore");
+          finishedMoving = true;
+        }
+      }
 
 
 
