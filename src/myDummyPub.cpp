@@ -30,9 +30,9 @@ int main(int argc, char **argv)
 
   geometry_msgs::PoseStamped sensedposePalm;//wrist --- Demo Data
   sensedposePalm.header.frame_id = "m1n6s200_link_base";
-  sensedposePalm.pose.position.x = -0.097046;
-  sensedposePalm.pose.position.y = -0.307429;
-  sensedposePalm.pose.position.z = 0.51759;
+  sensedposePalm.pose.position.x = 0.170336;
+  sensedposePalm.pose.position.y = -0.397985;
+  sensedposePalm.pose.position.z = 0.462527;
   sensedposePalm.pose.orientation.x = 0;
   sensedposePalm.pose.orientation.y = 0;
   sensedposePalm.pose.orientation.z = 0;

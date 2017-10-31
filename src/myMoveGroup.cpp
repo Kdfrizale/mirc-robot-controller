@@ -65,8 +65,8 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   poseTip2 = msg->poseTip2;
   posePalm = msg->posePalm;
   poseTip1 = msg->poseTip1;
-  posePalm.pose.position.y = posePalm.pose.position.y - 0.3; //offset for the arm not to be at origin --.46
-  posePalm.pose.position.z = posePalm.pose.position.z + 0.15; //offset to give more vertical
+  //posePalm.pose.position.y = posePalm.pose.position.y - 0.3; //offset for the arm not to be at origin --.46
+  //posePalm.pose.position.z = posePalm.pose.position.z + 0.15; //offset to give more vertical
   ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.x);
   ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.y);
   ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.z);
@@ -135,6 +135,7 @@ int main(int argc, char** argv)
   ros::WallDuration sleep_time(10.0);
   ros::WallDuration waitForPlan_time(0.5);
   ros::WallDuration waitForError(2);
+  ros::WallDuration waitForJointMoves(0.25);
   sleep_time.sleep();
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,18 +187,21 @@ int main(int argc, char** argv)
       //aka until the joints have remained the same for a period of time
       bool finishedMoving = false;
       //const robot_state::JointModelGroup *joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
-      geometry_msgs::PoseStamped oldEEPose = move_group.getCurrentPose("m1n6s200_end_effector");
-      geometry_msgs::PoseStamped newEEPose = move_group.getCurrentPose("m1n6s200_end_effector");
-      ROS_INFO("end effector pose is: [%f]", oldEEPose.pose.position.x);
+
+      moveit::core::RobotStatePtr current_state = move_group.getCurrentState();
+      std::vector<double> last_joint_positions;
+      current_state->copyJointGroupPositions(joint_model_group, last_joint_positions);
+      std::vector<double> current_joint_positions;
+      current_state->copyJointGroupPositions(joint_model_group, current_joint_positions);
       while (!finishedMoving){
-        waitForPlan_time.sleep();
-        newEEPose = move_group.getCurrentPose("m1n6s200_end_effector");
-        if (newEEPose.pose.position.x == oldEEPose.pose.position.x &&
-          newEEPose.pose.position.y == oldEEPose.pose.position.y &&
-          newEEPose.pose.position.z == oldEEPose.pose.position.z
-        ) {
-          ROS_INFO("im in the while, but not anymore");
+        waitForJointMoves.sleep();
+        current_state->copyJointGroupPositions(joint_model_group, current_joint_positions);
+        if (current_joint_positions == last_joint_positions){
+          ROS_INFO("Joints have not moved in set amount of time, assuming move has completed");
           finishedMoving = true;
+        }
+        else{
+          last_joint_positions = current_joint_positions;
         }
       }
 
