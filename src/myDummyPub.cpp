@@ -30,13 +30,13 @@ int main(int argc, char **argv)
 
   geometry_msgs::PoseStamped sensedposePalm;//wrist --- Demo Data
   sensedposePalm.header.frame_id = "m1n6s200_link_base";
-  sensedposePalm.pose.position.x = 0.208181;
-  sensedposePalm.pose.position.y = -0.263388;
-  sensedposePalm.pose.position.z = 0.477839;
-  sensedposePalm.pose.orientation.x = 0.691519;
-  sensedposePalm.pose.orientation.y = -0.137231;
-  sensedposePalm.pose.orientation.z = 0.689269;
-  sensedposePalm.pose.orientation.w = 0.166966;
+  sensedposePalm.pose.position.x = -0.097046;
+  sensedposePalm.pose.position.y = -0.307429;
+  sensedposePalm.pose.position.z = 0.51759;
+  sensedposePalm.pose.orientation.x = 0;
+  sensedposePalm.pose.orientation.y = 0;
+  sensedposePalm.pose.orientation.z = 0;
+  sensedposePalm.pose.orientation.w = 1;
 
   geometry_msgs::PoseStamped sensedPoseTip1;//Left Finger tip---Demo data
   sensedPoseTip1.header.frame_id = "m1n6s200_link_base";
@@ -79,8 +79,8 @@ int main(int argc, char **argv)
     //msg.position = [2, 3.59, 7.01, 3.07];
 
     chatter_pub.publish(msg);
-    //std::cout << "Press Enter to Continue" ;
-    //getchar();
+    std::cout << "Press Enter to Continue" ;
+    getchar();
     //ROS_INFO("%s",msg.data.c_str());
     ros::spinOnce();
 

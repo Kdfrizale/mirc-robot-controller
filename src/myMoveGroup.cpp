@@ -54,16 +54,32 @@ const double distanceBetweenFingersBase = 0.0625;//6.25cm
 const double fingersAngleOffset = 60; //60 degrees
 const double FINGER_MAX = 6400;
 const double distanceBetweenFingerTipsFullOpen = 0.1683; //17cm
+tf::Quaternion xRotationQuaternion = tf::createQuaternionFromRPY(1.5707,0.0, 0.0);//pi/2,0,0....90 degree offset on x axis
+tf::Quaternion zRotationQuaternion = tf::createQuaternionFromRPY(0.0, 0.0,1.5707);//0,0,pi/2....90 degree offset on z axis
 
 /////////////////////////////////////FUNCTIONS/////////////////////////////////////////////
 //Sets the desired poseTargets to the received input poses
 void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   ROS_INFO_THROTTLE(1,"I received a message.. now processing...");
+  tf::Quaternion originalQuarternion;
   poseTip2 = msg->poseTip2;
   posePalm = msg->posePalm;
   poseTip1 = msg->poseTip1;
   posePalm.pose.position.y = posePalm.pose.position.y - 0.3; //offset for the arm not to be at origin --.46
   posePalm.pose.position.z = posePalm.pose.position.z + 0.15; //offset to give more vertical
+  ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.x);
+  ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.y);
+  ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.z);
+  ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.w);
+  quaternionMsgToTF(posePalm.pose.orientation , originalQuarternion);
+  originalQuarternion *= xRotationQuaternion;
+  originalQuarternion.normalize();
+  originalQuarternion *= zRotationQuaternion;
+  quaternionTFToMsg(originalQuarternion, posePalm.pose.orientation);
+  ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.x);
+  ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.y);
+  ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.z);
+  ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.w);
   messageReceived = true;
 }
 
