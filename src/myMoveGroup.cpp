@@ -17,6 +17,7 @@
 #include <moveit_msgs/ExecuteTrajectoryGoal.h>
 #include <kinova_msgs/SetFingersPositionAction.h>
 #include <kinova_msgs/SetFingersPositionGoal.h>
+#include <kinova_msgs/JointAngles.h>
 #include <boost/scoped_ptr.hpp>
 
 #include <ctime>
@@ -37,7 +38,11 @@
 geometry_msgs::PoseStamped poseTip2;//Right Finger tip
 geometry_msgs::PoseStamped posePalm;//wrist
 geometry_msgs::PoseStamped poseTip1;//Left Finger tip
+
+kinova_msgs::JointAngles last_joint_positions;
 bool messageReceived = false;
+bool finishedMoving = false;
+
 
 // A tolerance of 0.01 m is specified in position
 // and 0.01 radians in orientation
@@ -81,6 +86,39 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.z);
   ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.w);
   messageReceived = true;
+}
+
+void checkRobotStopped(const kinova_msgs::JointAngles::ConstPtr& msg){
+  ROS_INFO("checking if robot has stopped moving...");
+  ROS_INFO("this is a joint position: [%f]", msg->joint1);
+  ROS_INFO("this is a joint position: [%f]", msg->joint2);
+  ROS_INFO("this is a joint position: [%f]", msg->joint3);
+  ROS_INFO("this is a joint position: [%f]", msg->joint4);
+  ROS_INFO("this is a joint position: [%f]", msg->joint5);
+  ROS_INFO("this is a joint position: [%f]", msg->joint6);
+  ROS_INFO("Now below is the previous joint Values");
+  ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint1);
+  ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint2);
+  ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint3);
+  ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint4);
+  ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint5);
+  ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint6);
+    if(trunc(msg->joint1) == trunc(last_joint_positions.joint1) &&
+        trunc(msg->joint2) == trunc(last_joint_positions.joint2) &&
+        trunc(msg->joint3) == trunc(last_joint_positions.joint3) &&
+        trunc(msg->joint4) == trunc(last_joint_positions.joint4) &&
+        trunc(msg->joint5) == trunc(last_joint_positions.joint5) &&
+        trunc(msg->joint6) == trunc(last_joint_positions.joint6)){
+          ROS_INFO("Im done moving");
+          finishedMoving = true;
+    }
+    last_joint_positions.joint1 = msg->joint1;
+    last_joint_positions.joint2 = msg->joint2;
+    last_joint_positions.joint3 = msg->joint3;
+    last_joint_positions.joint4 = msg->joint4;
+    last_joint_positions.joint5 = msg->joint5;
+    last_joint_positions.joint6 = msg->joint6;
+
 }
 
 double getDistanceBetweenPoints(geometry_msgs::PoseStamped pose1, geometry_msgs::PoseStamped pose2){
@@ -135,9 +173,10 @@ int main(int argc, char** argv)
   ros::WallDuration sleep_time(10.0);
   ros::WallDuration waitForPlan_time(0.5);
   ros::WallDuration waitForError(2);
-  ros::WallDuration waitForJointMoves(0.25);
+  ros::WallDuration waitForJointMoves(0.75);
   sleep_time.sleep();
 
+  ros::Subscriber sub = node_handle.subscribe("/handPoseTopic",1,updatePoseValues);
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   //---------Loop of the MAIN PROGRAM------------------------------
   //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +185,7 @@ int main(int argc, char** argv)
     //get input Pose using subscriber--which calls updatesPoseValues
     //Only continue when a new pose is received
     //////////////////////////////////////////////////////////////////////////////////////////////////////
-    ros::Subscriber sub = node_handle.subscribe("/handPoseTopic",1,updatePoseValues);
+
     if(!messageReceived){
       ROS_INFO_THROTTLE(1,"Message not Received...");
     }
@@ -160,11 +199,6 @@ int main(int argc, char** argv)
       //////////////////////////////////////////////////////////////////////////////////////////////////////
       //PLANNING and MOVING
       //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
       geometry_msgs::Pose desiredPose = posePalm.pose;
       move_group.setPoseTarget(desiredPose);
       //move_group.setPlanningTime(5);
@@ -185,27 +219,15 @@ int main(int argc, char** argv)
 
       //Wait here until the arm has stopped moving
       //aka until the joints have remained the same for a period of time
-      bool finishedMoving = false;
-      //const robot_state::JointModelGroup *joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
-
-      moveit::core::RobotStatePtr current_state = move_group.getCurrentState();
-      std::vector<double> last_joint_positions;
-      current_state->copyJointGroupPositions(joint_model_group, last_joint_positions);
-      std::vector<double> current_joint_positions;
-      current_state->copyJointGroupPositions(joint_model_group, current_joint_positions);
-      while (!finishedMoving){
-        waitForJointMoves.sleep();
-        current_state->copyJointGroupPositions(joint_model_group, current_joint_positions);
-        if (current_joint_positions == last_joint_positions){
-          ROS_INFO("Joints have not moved in set amount of time, assuming move has completed");
-          finishedMoving = true;
-        }
-        else{
-          last_joint_positions = current_joint_positions;
-        }
+      finishedMoving = false;
+      ros::Rate r(10); //10 Hz
+      ros::Subscriber subForMove = node_handle.subscribe("/m1n6s200_driver/out/joint_angles",1,checkRobotStopped);
+      while(!finishedMoving){
+        ROS_INFO("im in the while loop");
+        //maybe add a wait
+        ros::spinOnce();
+        r.sleep();
       }
-
-
 
 
       duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
@@ -237,11 +259,12 @@ int main(int argc, char** argv)
       }
 
       //sleep_time.sleep();//give time for the robot to move to the desired goal
+      finger_turn = 6000;
       ROS_INFO("Final finger_turn is : [%f]", finger_turn);
       kinova_msgs::SetFingersPositionGoal fingerGoal;
       fingerGoal.fingers.finger1 = finger_turn;
       fingerGoal.fingers.finger2 = finger_turn;
-      //finger_client.sendGoal(fingerGoal);
+      finger_client.sendGoal(fingerGoal);
 
       duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
       ROS_INFO("It took [%f] seconds to get past the finger move", duration);
