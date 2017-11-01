@@ -70,8 +70,14 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   poseTip2 = msg->poseTip2;
   posePalm = msg->posePalm;
   poseTip1 = msg->poseTip1;
-  //posePalm.pose.position.y = posePalm.pose.position.y - 0.3; //offset for the arm not to be at origin --.46
-  //posePalm.pose.position.z = posePalm.pose.position.z + 0.15; //offset to give more vertical
+  posePalm.pose.position.y = posePalm.pose.position.y - 0.3; //offset for the arm not to be at origin --.46
+  posePalm.pose.position.z = posePalm.pose.position.z + 0.15; //offset to give more vertical
+
+  posePalm.pose.orientation.x = 0;
+  posePalm.pose.orientation.y = 0;
+  posePalm.pose.orientation.z = 0;
+  posePalm.pose.orientation.w = 1;
+  
   ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.x);
   ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.y);
   ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.z);
@@ -85,6 +91,9 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.y);
   ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.z);
   ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.w);
+
+
+
   messageReceived = true;
 }
 
@@ -235,7 +244,7 @@ int main(int argc, char** argv)
 
 
       //Calculate Finger joint postions here, dont forget to update model in planning scene
-      double desiredDistanceApart = getDistanceBetweenPoints(poseTip1,poseTip2);
+      double desiredDistanceApart = getDistanceBetweenPoints(poseTip1,poseTip2) - 0.015; //decrease the distance by 15mm due to the fact of bone width and skin
       //DesiredDistanceApart = DistanceBetweenFingersBase + 2* LengthOfFinger*cos(JointPosition*60degrees +StationaryAngleDegreeOffset)
       //cos only does radians, so need to convert to degrees with equation -> cos(degrees * pi/180)
       //above wont work due to the finger possiblitiles being 0 to 6400 instead of 0 to 2
@@ -259,7 +268,6 @@ int main(int argc, char** argv)
       }
 
       //sleep_time.sleep();//give time for the robot to move to the desired goal
-      finger_turn = 6000;
       ROS_INFO("Final finger_turn is : [%f]", finger_turn);
       kinova_msgs::SetFingersPositionGoal fingerGoal;
       fingerGoal.fingers.finger1 = finger_turn;
