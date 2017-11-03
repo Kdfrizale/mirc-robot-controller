@@ -42,6 +42,7 @@ geometry_msgs::PoseStamped poseTip1;//Left Finger tip
 kinova_msgs::JointAngles last_joint_positions;
 bool messageReceived = false;
 bool finishedMoving = false;
+bool errorCodeReceived = false;
 
 
 // A tolerance of 0.01 m is specified in position
@@ -70,6 +71,12 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   poseTip2 = msg->poseTip2;
   posePalm = msg->posePalm;
   poseTip1 = msg->poseTip1;
+  //Check if msg is pre-determined error code
+  if (posePalm.pose.position.x = 123456789){
+    errorCodeReceived = true;
+    return;
+  }
+
   posePalm.pose.position.y = posePalm.pose.position.y - 0.42; //offset for the arm not to be at origin --.46
   posePalm.pose.position.z = posePalm.pose.position.z + 0.10; //offset to give more vertical
 
@@ -93,9 +100,6 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   // ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.y);
   // ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.z);
   // ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.w);
-
-
-
   messageReceived = true;
 }
 
@@ -234,9 +238,14 @@ int main(int argc, char** argv)
       ros::Rate r(10); //10 Hz
       ros::Subscriber subForMove = node_handle.subscribe("/m1n6s200_driver/out/joint_angles",1,checkRobotStopped);
       while(!finishedMoving){
-        ROS_INFO("im in the while loop");
+        ROS_INFO_THROTTLE(1,"Waiting for arm to finish moving...");
         //maybe add a wait
         ros::spinOnce();
+        if(errorCodeReceived){
+          move_group.stop();
+          finishedMoving = true;
+          errorCodeReceived = false;
+        }
         r.sleep();
       }
 
@@ -297,6 +306,7 @@ int main(int argc, char** argv)
       //Reset
       //////////////////////////////////////////////////////////////////////////////////////////////////////
       messageReceived = false;
+      errorCodeReceived = false;
 
       duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
       ROS_INFO("It took [%f] seconds for this cycle", duration);
