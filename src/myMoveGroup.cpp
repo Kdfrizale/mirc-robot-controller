@@ -70,27 +70,29 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   poseTip2 = msg->poseTip2;
   posePalm = msg->posePalm;
   poseTip1 = msg->poseTip1;
-  posePalm.pose.position.y = posePalm.pose.position.y - 0.3; //offset for the arm not to be at origin --.46
-  posePalm.pose.position.z = posePalm.pose.position.z + 0.15; //offset to give more vertical
+  posePalm.pose.position.y = posePalm.pose.position.y - 0.42; //offset for the arm not to be at origin --.46
+  posePalm.pose.position.z = posePalm.pose.position.z + 0.10; //offset to give more vertical
 
-  posePalm.pose.orientation.x = 0;
-  posePalm.pose.orientation.y = 0;
-  posePalm.pose.orientation.z = 0;
-  posePalm.pose.orientation.w = 1;
-  
-  ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.x);
-  ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.y);
-  ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.z);
-  ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.w);
+  // posePalm.pose.orientation.x = 0;
+  // posePalm.pose.orientation.y = 0;
+  // posePalm.pose.orientation.z = 0;
+  // posePalm.pose.orientation.w = 1;
+  //
+  // ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.x);
+  // ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.y);
+  // ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.z);
+  // ROS_INFO("this is the quaternion before:[%f] ", posePalm.pose.orientation.w);
+
   quaternionMsgToTF(posePalm.pose.orientation , originalQuarternion);
   originalQuarternion *= xRotationQuaternion;
   originalQuarternion.normalize();
   originalQuarternion *= zRotationQuaternion;
   quaternionTFToMsg(originalQuarternion, posePalm.pose.orientation);
-  ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.x);
-  ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.y);
-  ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.z);
-  ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.w);
+
+  // ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.x);
+  // ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.y);
+  // ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.z);
+  // ROS_INFO("this is the quaternion after:[%f] ", posePalm.pose.orientation.w);
 
 
 
@@ -98,20 +100,20 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
 }
 
 void checkRobotStopped(const kinova_msgs::JointAngles::ConstPtr& msg){
-  ROS_INFO("checking if robot has stopped moving...");
-  ROS_INFO("this is a joint position: [%f]", msg->joint1);
-  ROS_INFO("this is a joint position: [%f]", msg->joint2);
-  ROS_INFO("this is a joint position: [%f]", msg->joint3);
-  ROS_INFO("this is a joint position: [%f]", msg->joint4);
-  ROS_INFO("this is a joint position: [%f]", msg->joint5);
-  ROS_INFO("this is a joint position: [%f]", msg->joint6);
-  ROS_INFO("Now below is the previous joint Values");
-  ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint1);
-  ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint2);
-  ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint3);
-  ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint4);
-  ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint5);
-  ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint6);
+  // ROS_INFO("checking if robot has stopped moving...");
+  // ROS_INFO("this is a joint position: [%f]", msg->joint1);
+  // ROS_INFO("this is a joint position: [%f]", msg->joint2);
+  // ROS_INFO("this is a joint position: [%f]", msg->joint3);
+  // ROS_INFO("this is a joint position: [%f]", msg->joint4);
+  // ROS_INFO("this is a joint position: [%f]", msg->joint5);
+  // ROS_INFO("this is a joint position: [%f]", msg->joint6);
+  // ROS_INFO("Now below is the previous joint Values");
+  // ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint1);
+  // ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint2);
+  // ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint3);
+  // ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint4);
+  // ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint5);
+  // ROS_INFO("this is a joint position: [%f]", last_joint_positions.joint6);
     if(trunc(msg->joint1) == trunc(last_joint_positions.joint1) &&
         trunc(msg->joint2) == trunc(last_joint_positions.joint2) &&
         trunc(msg->joint3) == trunc(last_joint_positions.joint3) &&
