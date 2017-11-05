@@ -72,7 +72,8 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   posePalm = msg->posePalm;
   poseTip1 = msg->poseTip1;
   //Check if msg is pre-determined error code
-  if (posePalm.pose.position.x = 123456789){
+  if (posePalm.pose.position.x == 123456789){
+    ROS_INFO("ERROR MESSAGE RECEIVED!!");
     errorCodeReceived = true;
     return;
   }
@@ -167,6 +168,7 @@ int main(int argc, char** argv)
 
   moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
   move_group.setPlanningTime(0.1);
+  move_group.setWorkspace(-100,-100,0.04,100,100,100);
   //moveit::planning_interface::MoveGroupInterface gripper_group("gripper");
   //gripper_group_ = new moveit::planning_interface::MoveGroup("gripper");
   //move_group->setEndEffectorLink("m1n6s200_end_effector");
@@ -189,6 +191,7 @@ int main(int argc, char** argv)
   ros::WallDuration waitForPlan_time(0.5);
   ros::WallDuration waitForError(2);
   ros::WallDuration waitForJointMoves(0.75);
+  ros::Duration waitForFingers(0.50);
   sleep_time.sleep();
 
   ros::Subscriber sub = node_handle.subscribe("/handPoseTopic",1,updatePoseValues);
@@ -225,6 +228,7 @@ int main(int argc, char** argv)
       ROS_INFO("It took [%f] seconds to get past the arm plan", duration);
 
       move_group.move();
+
       //move_group.execute(my_plan);
       ROS_INFO("This shouldn't appear until after the robot has finished moving..");
       //Could add a check to check that all the published joints have remained the same to verify move is over?
@@ -235,7 +239,7 @@ int main(int argc, char** argv)
       //Wait here until the arm has stopped moving
       //aka until the joints have remained the same for a period of time
       finishedMoving = false;
-      ros::Rate r(10); //10 Hz
+      ros::Rate r(7); //7 Hz
       ros::Subscriber subForMove = node_handle.subscribe("/m1n6s200_driver/out/joint_angles",1,checkRobotStopped);
       while(!finishedMoving){
         ROS_INFO_THROTTLE(1,"Waiting for arm to finish moving...");
@@ -255,7 +259,7 @@ int main(int argc, char** argv)
 
 
       //Calculate Finger joint postions here, dont forget to update model in planning scene
-      double desiredDistanceApart = getDistanceBetweenPoints(poseTip1,poseTip2) - 0.015; //decrease the distance by 15mm due to the fact of bone width and skin
+      double desiredDistanceApart = getDistanceBetweenPoints(poseTip1,poseTip2) - 0.02; //decrease the distance by 15mm due to the fact of bone width and skin
       //DesiredDistanceApart = DistanceBetweenFingersBase + 2* LengthOfFinger*cos(JointPosition*60degrees +StationaryAngleDegreeOffset)
       //cos only does radians, so need to convert to degrees with equation -> cos(degrees * pi/180)
       //above wont work due to the finger possiblitiles being 0 to 6400 instead of 0 to 2
@@ -283,7 +287,7 @@ int main(int argc, char** argv)
       kinova_msgs::SetFingersPositionGoal fingerGoal;
       fingerGoal.fingers.finger1 = finger_turn;
       fingerGoal.fingers.finger2 = finger_turn;
-      finger_client.sendGoal(fingerGoal);
+      finger_client.sendGoalAndWait(fingerGoal);
 
       duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
       ROS_INFO("It took [%f] seconds to get past the finger move", duration);
