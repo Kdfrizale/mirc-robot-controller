@@ -71,13 +71,13 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   poseTip2 = msg->poseTip2;
   posePalm = msg->posePalm;
   poseTip1 = msg->poseTip1;
+  //ROS_INFO("this is what I got: [%f]",posePalm.pose.position.x);
   //Check if msg is pre-determined error code
-  if (posePalm.pose.position.x == 123456789){
+  if (posePalm.pose.position.x == 123456789.0){
     ROS_INFO("ERROR MESSAGE RECEIVED!!");
     errorCodeReceived = true;
     return;
   }
-
   posePalm.pose.position.y = posePalm.pose.position.y - 0.42; //offset for the arm not to be at origin --.46
   posePalm.pose.position.z = posePalm.pose.position.z + 0.10; //offset to give more vertical
 
@@ -246,6 +246,7 @@ int main(int argc, char** argv)
         //maybe add a wait
         ros::spinOnce();
         if(errorCodeReceived){
+          ROS_INFO("I tried to stop!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
           move_group.stop();
           finishedMoving = true;
           errorCodeReceived = false;
