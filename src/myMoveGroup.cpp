@@ -23,6 +23,7 @@ bool errorCodeReceived = false;
 const double FINGER_MAX = 6400;
 const double distanceBetweenFingerTipsFullOpen = 0.1683; //17cm
 tf::Quaternion xRotationQuaternion = tf::createQuaternionFromRPY(1.5707,0.0, 0.0);//pi/2,0,0....90 degree offset on x axis
+tf::Quaternion yRotationQuaternion = tf::createQuaternionFromRPY(0.0,1.5707, 0.0);//pi/2,0,0....90 degree offset on y axis
 tf::Quaternion zRotationQuaternion = tf::createQuaternionFromRPY(0.0, 0.0,1.5707);//0,0,pi/2....90 degree offset on z axis
 
 ros::WallDuration sleep_time(10.0);
@@ -34,9 +35,7 @@ ros::WallDuration waitForJointMoves(0.75);
 void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   ROS_INFO_THROTTLE(1,"I received a message.. now processing...");
   tf::Quaternion originalQuarternion;
-  poseTip2 = msg->poseTip2;
   posePalm = msg->posePalm;
-  poseTip1 = msg->poseTip1;
 
   //Check if msg is pre-determined error code
   if (posePalm.pose.position.x == 123456789.0){
@@ -44,6 +43,9 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
     errorCodeReceived = true;
     return;
   }
+  poseTip2 = msg->poseTip2;
+  poseTip1 = msg->poseTip1;
+
   posePalm.pose.position.y = posePalm.pose.position.y - 0.42; //offset for the arm not to be at origin --.46
   posePalm.pose.position.z = posePalm.pose.position.z + 0.10; //offset to give more vertical
 
@@ -52,6 +54,7 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   originalQuarternion *= xRotationQuaternion;
   originalQuarternion.normalize();
   originalQuarternion *= zRotationQuaternion;
+  originalQuarternion.normalize();
   quaternionTFToMsg(originalQuarternion, posePalm.pose.orientation);
 
   messageReceived = true;
