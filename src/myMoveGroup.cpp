@@ -26,7 +26,7 @@ tf::Quaternion xRotationQuaternion = tf::createQuaternionFromRPY(1.5707,0.0, 0.0
 tf::Quaternion yRotationQuaternion = tf::createQuaternionFromRPY(0.0,1.5707, 0.0);//pi/2,0,0....90 degree offset on y axis
 tf::Quaternion zRotationQuaternion = tf::createQuaternionFromRPY(0.0, 0.0,1.5707);//0,0,pi/2....90 degree offset on z axis
 
-ros::WallDuration sleep_time(10.0);
+ros::WallDuration sleep_time(3.0);
 ros::WallDuration waitForSmall_time(0.5);
 ros::WallDuration waitForJointMoves(0.75);
 
@@ -39,7 +39,7 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
 
   //Check if msg is pre-determined error code
   if (posePalm.pose.position.x == 123456789.0){
-    ROS_INFO_THROTTLE(1,"ERROR MESSAGE RECEIVED: NO INPUT DETECTED!!");
+    ROS_INFO_THROTTLE(1,"Default Message received");
     errorCodeReceived = true;
     return;
   }
@@ -167,7 +167,13 @@ int main(int argc, char** argv)
       // ROS_INFO("It took [%f] seconds to get past the arm move", duration);
 
       //Calculate Finger joint postions
-      double desiredDistanceApart = getDistanceBetweenPoints(poseTip1,poseTip2) - 0.02; //decrease the distance by 15mm due to the fact of bone width and skin
+      ROS_INFO("this is the distance apart fingers: [%f]", getDistanceBetweenPoints(poseTip1,poseTip2) -0.01);
+      double desiredDistanceApart = getDistanceBetweenPoints(poseTip1,poseTip2) -0.01; //-0.02,decrease the distance by 15mm due to the fact of bone width and skin
+      //create scalar value system to fully replicate user intent
+      //user max is 0.064
+      //robot max is 0.147
+      ROS_INFO("the edited distance apart is [%f]", desiredDistanceApart/0.064 * 0.147);
+      desiredDistanceApart = (desiredDistanceApart * 1.35) -0.015;
       double ratioClosed = desiredDistanceApart / distanceBetweenFingerTipsFullOpen;
       ratioClosed = 1 -ratioClosed; //flip the scale around as 6400 is closed, and 0 is open
       double finger_turn = ratioClosed * FINGER_MAX;
