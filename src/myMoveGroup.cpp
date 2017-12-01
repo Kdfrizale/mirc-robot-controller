@@ -49,8 +49,12 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   posePalm.pose.position.y = posePalm.pose.position.y - 0.42; //offset for the arm not to be at origin --.46
   posePalm.pose.position.z = posePalm.pose.position.z + 0.10; //offset to give more vertical
 
+  double temp = posePalm.pose.orientation.x;
+  posePalm.pose.orientation.x = -posePalm.pose.orientation.y;
+  posePalm.pose.orientation.y = temp;
   //Rotate the given pose to more accurately match the robot
   quaternionMsgToTF(posePalm.pose.orientation , originalQuarternion);
+  originalQuarternion.normalize();
   originalQuarternion *= xRotationQuaternion;
   originalQuarternion.normalize();
   originalQuarternion *= zRotationQuaternion;
