@@ -47,12 +47,14 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   poseTip1 = msg->poseTip1;
 
   posePalm.pose.position.y = posePalm.pose.position.y - 0.42; //offset for the arm not to be at origin --.46
-  posePalm.pose.position.z = posePalm.pose.position.z + 0.10; //offset to give more vertical
+  posePalm.pose.position.z = posePalm.pose.position.z + 0.10; //offset to give more vertical space
 
+  //Switch the axis of orientation to correct the translation from the leap motion
   double temp = posePalm.pose.orientation.x;
   posePalm.pose.orientation.x = -posePalm.pose.orientation.y;
   posePalm.pose.orientation.y = temp;
-  //Rotate the given pose to more accurately match the robot
+
+  //Rotate the given pose to so the robot matchs the user's hand at 0 0 0 1 orientation
   quaternionMsgToTF(posePalm.pose.orientation , originalQuarternion);
   originalQuarternion.normalize();
   originalQuarternion *= xRotationQuaternion;
@@ -64,6 +66,7 @@ void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   messageReceived = true;
 }
 
+//Callback method to check if the robot has finished moving
 void checkRobotStopped(const kinova_msgs::JointAngles::ConstPtr& msg){
     if(trunc(msg->joint1) == trunc(last_joint_positions.joint1) &&
         trunc(msg->joint2) == trunc(last_joint_positions.joint2) &&
@@ -82,6 +85,7 @@ void checkRobotStopped(const kinova_msgs::JointAngles::ConstPtr& msg){
     last_joint_positions.joint6 = msg->joint6;
 }
 
+//Calculate the distance between two 3D points in space
 double getDistanceBetweenPoints(geometry_msgs::PoseStamped pose1, geometry_msgs::PoseStamped pose2){
   double result = 0.0;
   double intermediateDistance = 0.0;
@@ -135,9 +139,10 @@ int main(int argc, char** argv)
     else{//messageReceived so start planning
       ROS_INFO_THROTTLE(1,"Message was Received!");
 
-      std::clock_t start;
-      double duration;
-      start = std::clock();
+      //Clock used to benchmark the system during Developement
+      // std::clock_t start;
+      // double duration;
+      // start = std::clock();
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////
       //PLANNING and MOVING
@@ -154,7 +159,6 @@ int main(int argc, char** argv)
       //Wait here until the arm has stopped moving
       //aka until the joints have remained the same for a period of time
       finishedMoving = false;
-      //ros::Rate r(7); //7 Hz
       ros::Subscriber subForMove = node_handle.subscribe("/m1n6s200_driver/out/joint_angles",1,checkRobotStopped);
       while(!finishedMoving){
         ROS_INFO_THROTTLE(1,"Waiting for arm to finish moving...");
@@ -165,23 +169,19 @@ int main(int argc, char** argv)
           errorCodeReceived = false;
         }
         waitForJointMoves.sleep();
-        //r.sleep();
       }
       // duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
       // ROS_INFO("It took [%f] seconds to get past the arm move", duration);
 
       //Calculate Finger joint postions
-      ROS_INFO("this is the distance apart fingers: [%f]", getDistanceBetweenPoints(poseTip1,poseTip2) -0.01);
-      double desiredDistanceApart = getDistanceBetweenPoints(poseTip1,poseTip2) -0.01; //-0.02,decrease the distance by 15mm due to the fact of bone width and skin
-      //create scalar value system to fully replicate user intent
-      //user max is 0.064
-      //robot max is 0.147
-      ROS_INFO("the edited distance apart is [%f]", desiredDistanceApart/0.064 * 0.147);
-      desiredDistanceApart = (desiredDistanceApart * 1.35) -0.015;
+      //ROS_INFO("this is the distance apart fingers: [%f]", getDistanceBetweenPoints(poseTip1,poseTip2) -0.01);
+      double desiredDistanceApart = getDistanceBetweenPoints(poseTip1,poseTip2) -0.01; //-0.01,decrease the distance by 1cm due to the fact of bone width and skin
+      desiredDistanceApart = (desiredDistanceApart * 1.35) -0.015; // Multiply the distance to allow the robot to open to its full width, which is wider than the user's hand can open
       double ratioClosed = desiredDistanceApart / distanceBetweenFingerTipsFullOpen;
       ratioClosed = 1 -ratioClosed; //flip the scale around as 6400 is closed, and 0 is open
       double finger_turn = ratioClosed * FINGER_MAX;
 
+      //Set boundary limits on the how wide the fingers can open
       if (finger_turn < 0){
         finger_turn = 0.0;
       }
@@ -203,8 +203,8 @@ int main(int argc, char** argv)
       messageReceived = false;
       errorCodeReceived = false;
 
-      duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-      ROS_INFO("It took [%f] seconds for this cycle", duration);
+      // duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+      // ROS_INFO("It took [%f] seconds for this cycle", duration);
   }
   ros::spinOnce();
 }//Loop back to start of main Program
