@@ -81,5 +81,9 @@ add_executable(myMoveGroup src/myMoveGroup.cpp)
 target_link_libraries(myMoveGroup ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS myMoveGroup DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+add_executable(myClassTest src/myClassTest.cpp include/myClassTest.h)
+target_link_libraries(myClassTest ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+install(TARGETS myClassTest DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
 add_executable(myDummyPub src/myDummyPub.cpp)
 target_link_libraries(myDummyPub ${catkin_LIBRARIES})

@@ -1,22 +1,25 @@
-#include <string>
-
-class RoboticArm {
-public:
-  RoboticArm(ros::NodeHandle &nh);
-  bool planAndMove(geometry_msgs::Pose targetPose);
-  ~RoboticArm();
+#include <myClassTest.h>
 
 
-private:
-  double yOffset;
-  std::string armPlanningGroupName;
-  void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg);
-  void beginListening();
-  void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg);
+RoboticArm::RoboticArm(ros::NodeHandle &nh):nh_(nh){
+  ros::Subscriber sub = nh_.subscribe("/handPoseTopic",1,&RoboticArm::updatePoseValues, this);
 
+
+  //group_ = new moveit::planning_interface::MoveGroupInterface("arm");
+  ///////static const std::string PLANNING_GROUP = "arm";
+  ///////////moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
+
+  beginListening();
 }
-bool RoboticArm::planAndMove(geometry_msgs::Pose targetPose){
+
+RoboticArm::~RoboticArm(){
+    delete group_;
+    delete gripper_group_;
+}
+
+bool RoboticArm::planAndMove(){
   ROS_INFO_THROTTLE(1, "here is were the move group would be accessed");
+  ROS_INFO("The received Pose Position X is: [%f]", this->sensedPosePalm_.pose.position.x);
   return true;
 }
 
@@ -24,23 +27,41 @@ bool RoboticArm::planAndMove(geometry_msgs::Pose targetPose){
 void RoboticArm::updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   ROS_INFO_THROTTLE(1,"I received a message.. now processing...");
   //set desiredPose to match the HandStampedPose
-  RoboticArm::planAndMove(desiredPose);
+  this->sensedPosePalm_ = msg->posePalm;
+  this->planAndMove();
 }
-
-RoboticArm::RoboticArm(ros::NodeHandle &nh):nh_(nh){
-  ros::Subscriber sub = nh_.subscribe("/handPoseTopic",1,updatePoseValues);
-  geometry_msgs::PoseStamped poseTip2;//Right Finger tip
-  geometry_msgs::PoseStamped posePalm;//wrist
-  geometry_msgs::PoseStamped poseTip1;//Left Finger tip
-
-  static const std::string PLANNING_GROUP = "arm";
-  moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
-
-  beginListening();
-  }
 
 void RoboticArm::beginListening(){
   while (ros::ok()){
+    ROS_INFO_THROTTLE(1,"Listening...");
     ros::spinOnce();
   }
+}
+
+geometry_msgs::Pose rotatePose(geometry_msgs::PoseStamped &inputPose){
+  tf::Quaternion xRotationQuaternion = tf::createQuaternionFromRPY(1.5707,0.0, 0.0);//pi/2,0,0....90 degree offset on x axis
+  tf::Quaternion yRotationQuaternion = tf::createQuaternionFromRPY(0.0,1.5707, 0.0);//pi/2,0,0....90 degree offset on y axis
+  tf::Quaternion zRotationQuaternion = tf::createQuaternionFromRPY(0.0, 0.0,1.5707);//0,0,pi/2....90 degree offset on z axis
+
+  tf::Quaternion originalQuarternion;
+  quaternionMsgToTF(inputPose.pose.orientation , originalQuarternion);
+  originalQuarternion.normalize();
+  originalQuarternion *= xRotationQuaternion;
+  originalQuarternion.normalize();
+  originalQuarternion *= zRotationQuaternion;
+  originalQuarternion.normalize();
+  quaternionTFToMsg(originalQuarternion, inputPose.pose.orientation);
+}
+
+int main(int argc, char** argv){
+  ros::init(argc, argv, "myClassTestCode");
+  ros::NodeHandle node;
+  ros::AsyncSpinner spinner(1);
+  spinner.start();
+  ROS_INFO_THROTTLE(1,"Beginning...");
+  RoboticArm myArm = RoboticArm(node);
+
+
+  ros::spin();
+  return 0;
 }
