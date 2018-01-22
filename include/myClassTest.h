@@ -17,9 +17,6 @@ public:
   RoboticArm(ros::NodeHandle &nh);
   ~RoboticArm();
 
-
-
-
 private:
   ros::NodeHandle nh_;
   double yOffset_;
@@ -35,7 +32,6 @@ private:
   moveit::planning_interface::MoveGroupInterface::Plan planGripper_;
 
   ros::Subscriber sub_leap_hand_;
-
 
   void beginListening();
   bool planAndMove();
