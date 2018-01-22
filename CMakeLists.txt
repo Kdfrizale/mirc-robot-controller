@@ -73,16 +73,9 @@ link_directories(${catkin_LIBRARY_DIRS})
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS})
 
-add_executable(myPlanner src/myPlanner.cpp)
-target_link_libraries(myPlanner ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-install(TARGETS myPlanner DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
-add_executable(myMoveGroup src/myMoveGroup.cpp)
-target_link_libraries(myMoveGroup ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-install(TARGETS myMoveGroup DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
-add_executable(myClassTest src/myClassTest.cpp include/myClassTest.h)
-target_link_libraries(myClassTest ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_executable(myClassTest src/myClassTest.cpp include/myClassTest.h include/utilities.h)
+add_library(utilities src/utilities.cpp)
+target_link_libraries(myClassTest ${catkin_LIBRARIES} ${Boost_LIBRARIES} utilities)
 install(TARGETS myClassTest DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 add_executable(myDummyPub src/myDummyPub.cpp)

@@ -2,6 +2,7 @@
 #include <pluginlib/class_loader.h>
 #include <ros/ros.h>
 #include <arm_mimic_capstone/HandStampedPose.h>
+#include <utilities.h>
 
 // MoveIt!
 #include <moveit/move_group_interface/move_group_interface.h>
@@ -15,7 +16,7 @@ class RoboticArm {
 public:
   RoboticArm(ros::NodeHandle &nh);
   ~RoboticArm();
-  geometry_msgs::Pose rotatePose(geometry_msgs::PoseStamped &inputPose);//maybe change this to accept axis of rotations as parameter
+
 
 
 
@@ -30,6 +31,8 @@ private:
 
   moveit::planning_interface::MoveGroupInterface* group_;
   moveit::planning_interface::MoveGroupInterface* gripper_group_;
+  moveit::planning_interface::MoveGroupInterface::Plan planArm_;
+  moveit::planning_interface::MoveGroupInterface::Plan planGripper_;
 
   ros::Subscriber sub_leap_hand_;
 

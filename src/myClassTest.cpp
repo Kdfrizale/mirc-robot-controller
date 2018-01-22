@@ -3,11 +3,7 @@
 
 RoboticArm::RoboticArm(ros::NodeHandle &nh):nh_(nh){
   ros::Subscriber sub = nh_.subscribe("/handPoseTopic",1,&RoboticArm::updatePoseValues, this);
-
-
-  //group_ = new moveit::planning_interface::MoveGroupInterface("arm");
-  ///////static const std::string PLANNING_GROUP = "arm";
-  ///////////moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
+  group_ = new moveit::planning_interface::MoveGroupInterface("arm");
 
   beginListening();
 }
@@ -18,9 +14,16 @@ RoboticArm::~RoboticArm(){
 }
 
 bool RoboticArm::planAndMove(){
-  ROS_INFO_THROTTLE(1, "here is were the move group would be accessed");
-  ROS_INFO("The received Pose Position X is: [%f]", this->sensedPosePalm_.pose.position.x);
-  return true;
+  //ROS_INFO("The received Pose Position X is: [%f]", this->sensedPosePalm_.pose.position.x);
+  group_->setPoseTarget(rotatePoseStamped(this->sensedPosePalm_));
+  ROS_INFO("the altered orientation is: [%f]", this->sensedPosePalm_.pose.orientation.x);
+  ROS_INFO("the altered orientation is: [%f]", rotatePoseStamped(this->sensedPosePalm_).pose.orientation.x);
+  bool validPlanArm = group_->plan(this->planArm_);
+
+  if(validPlanArm){
+    return group_->execute(this->planArm_);
+  }
+  return validPlanArm;
 }
 
 //Sets the desired poseTargets to the received input poses
@@ -36,21 +39,6 @@ void RoboticArm::beginListening(){
     ROS_INFO_THROTTLE(1,"Listening...");
     ros::spinOnce();
   }
-}
-
-geometry_msgs::Pose rotatePose(geometry_msgs::PoseStamped &inputPose){
-  tf::Quaternion xRotationQuaternion = tf::createQuaternionFromRPY(1.5707,0.0, 0.0);//pi/2,0,0....90 degree offset on x axis
-  tf::Quaternion yRotationQuaternion = tf::createQuaternionFromRPY(0.0,1.5707, 0.0);//pi/2,0,0....90 degree offset on y axis
-  tf::Quaternion zRotationQuaternion = tf::createQuaternionFromRPY(0.0, 0.0,1.5707);//0,0,pi/2....90 degree offset on z axis
-
-  tf::Quaternion originalQuarternion;
-  quaternionMsgToTF(inputPose.pose.orientation , originalQuarternion);
-  originalQuarternion.normalize();
-  originalQuarternion *= xRotationQuaternion;
-  originalQuarternion.normalize();
-  originalQuarternion *= zRotationQuaternion;
-  originalQuarternion.normalize();
-  quaternionTFToMsg(originalQuarternion, inputPose.pose.orientation);
 }
 
 int main(int argc, char** argv){
