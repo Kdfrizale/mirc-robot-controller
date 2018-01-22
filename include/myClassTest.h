@@ -1,16 +1,7 @@
-#include <string>
-#include <pluginlib/class_loader.h>
 #include <ros/ros.h>
+#include <moveit/move_group_interface/move_group_interface.h>
 #include <arm_mimic_capstone/HandStampedPose.h>
 #include <utilities.h>
-
-// MoveIt!
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <kinova_msgs/SetFingersPositionAction.h>
-#include <kinova_msgs/SetFingersPositionGoal.h>
-#include <kinova_msgs/JointAngles.h>
-#include <actionlib/client/simple_action_client.h>
-#include <ctime>
 
 class RoboticArm {
 public:
@@ -20,11 +11,11 @@ public:
 private:
   ros::NodeHandle nh_;
   double yOffset_;
+  bool receivedNewPose_;
 
   geometry_msgs::PoseStamped sensedPoseTip2_;//Right Finger tip
   geometry_msgs::PoseStamped sensedPosePalm_;//wrist
   geometry_msgs::PoseStamped sensedPoseTip1_;//Left Finger tip
-  geometry_msgs::Pose goalArmEEPose_;
 
   moveit::planning_interface::MoveGroupInterface* group_;
   moveit::planning_interface::MoveGroupInterface* gripper_group_;
@@ -34,7 +25,8 @@ private:
   ros::Subscriber sub_leap_hand_;
 
   void beginListening();
-  bool planAndMove();
+  bool calculatePath();
+  bool executePath();
   void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg);
 
 

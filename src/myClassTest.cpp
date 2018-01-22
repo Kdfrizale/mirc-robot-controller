@@ -1,8 +1,9 @@
 #include <myClassTest.h>
 
 RoboticArm::RoboticArm(ros::NodeHandle &nh):nh_(nh){
-  ros::Subscriber sub = nh_.subscribe("/handPoseTopic",1,&RoboticArm::updatePoseValues, this);//TODO change this to member sub
+  sub_leap_hand_ = nh_.subscribe("/handPoseTopic",1,&RoboticArm::updatePoseValues, this);
   group_ = new moveit::planning_interface::MoveGroupInterface("arm");
+  receivedNewPose_ = false;
 
   beginListening();
 }
@@ -12,28 +13,33 @@ RoboticArm::~RoboticArm(){
     delete gripper_group_;
 }
 
-bool RoboticArm::planAndMove(){
-  group_->setPoseTarget(rotatePoseStamped(this->sensedPosePalm_));
-  bool validPlanArm = group_->plan(this->planArm_);
+bool RoboticArm::calculatePath(){
+  group_->setPoseTarget(rotatePoseStamped(sensedPosePalm_));
+  return group_->plan(planArm_);
+}
 
-  if(validPlanArm){
-    return group_->execute(this->planArm_);
-  }
-  return validPlanArm;
+bool RoboticArm::executePath(){
+  return group_->execute(planArm_);
 }
 
 //Sets the desired poseTargets to the received input poses
 void RoboticArm::updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   ROS_INFO_THROTTLE(1,"Received Input. Now processing...");
   //set desiredPose to match the HandStampedPose
-  this->sensedPosePalm_ = msg->posePalm;
-  this->planAndMove();
+  sensedPosePalm_ = msg->posePalm;
+  receivedNewPose_ = true;
 }
 
 void RoboticArm::beginListening(){
   while (ros::ok()){
     ROS_INFO_THROTTLE(1,"Waiting for input...");
     ros::spinOnce();
+    if(receivedNewPose_){
+      receivedNewPose_ = false;
+      if(this->calculatePath()){
+        this->executePath();
+      }
+    }
   }
 }
 
