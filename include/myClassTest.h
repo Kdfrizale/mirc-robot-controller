@@ -7,6 +7,7 @@ class RoboticArm {
 public:
   RoboticArm(ros::NodeHandle &nh);
   ~RoboticArm();
+  void beginListening();
 
 private:
   ros::NodeHandle nh_;
@@ -24,10 +25,7 @@ private:
 
   ros::Subscriber sub_leap_hand_;
 
-  void beginListening();
-  bool calculatePath();
-  bool executePath();
+  bool calculateMove();
+  bool executeMove();
   void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg);
-
-
 };
