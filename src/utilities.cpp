@@ -18,7 +18,7 @@ geometry_msgs::PoseStamped rotatePoseStamped(geometry_msgs::PoseStamped inputPos
 }
 
 //Calculate the distance between two 3D points in space
-double getDistanceBetweenPoints(const geometry_msgs::PoseStamped &pose1, const geometry_msgs::PoseStamped &pose2){
+double getDistanceBetweenPoints(geometry_msgs::PoseStamped pose1, geometry_msgs::PoseStamped pose2){
   double xDistance =fabs(pose1.pose.position.x - pose2.pose.position.x);
   double yDistance =fabs(pose1.pose.position.y - pose2.pose.position.y);
   double zDistance =fabs(pose1.pose.position.z - pose2.pose.position.z);
