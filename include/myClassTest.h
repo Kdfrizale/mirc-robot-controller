@@ -30,4 +30,5 @@ private:
   bool calculateMove();
   bool executeMove();
   void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg);
+  void translatePoseFromLeap(geometry_msgs::PoseStamped& inputPose);
 };

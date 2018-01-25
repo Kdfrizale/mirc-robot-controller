@@ -13,6 +13,17 @@ RoboticArm::~RoboticArm(){
     delete group_;
     delete gripper_group_;
 }
+void RoboticArm::translatePoseFromLeap(geometry_msgs::PoseStamped& inputPose){
+  //TODO Add the necessary adjustments to the pose before Planning can start
+  //Things Needed:
+    //Axis Switch,,, use rotatePoseStamped function
+      //both on orientation and position
+    //yOffset ,,, so the arm is not centered at its base
+    //any other axis offset Needed
+
+    //TODO Finally add this function to updatePoseValues, and remove rotatePoseStamped from calculateMove
+}
+
 bool RoboticArm::calculateMove(){
   //Calculate require joint values for fingers
   double ratioOpen = std::min(1.0,calculateDistanceBetweenPoints(sensedPoseTip1_,sensedPoseTip2_)/DISTANCE_BETWEEN_USER_FINGERS_FULL_OPEN);
@@ -22,6 +33,7 @@ bool RoboticArm::calculateMove(){
   std::map<std::string, double>::iterator it_open = openedJointValues_.begin();
   std::map<std::string, double>::iterator it_close = closedJointValues_.begin();
   while (it_jv != jointValueGoal.end() || it_open != openedJointValues_.end() || it_close != closedJointValues_.end()){
+    //Set jointValueGoal to be the ratio between the robot's MoveIt defined Open and Close preset Poses
     it_jv->second = calculateValueBetweenRange(it_open->second, it_close->second, 1-ratioOpen);
     it_jv++;
     it_open++;
