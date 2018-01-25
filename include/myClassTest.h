@@ -14,6 +14,7 @@ private:
   double yOffset_;
   bool receivedNewPose_;
   std::map<std::string, double> closedJointValues_;
+  std::map<std::string, double> openedJointValues_;
 
   geometry_msgs::PoseStamped sensedPoseTip2_;//Right Finger tip
   geometry_msgs::PoseStamped sensedPosePalm_;//wrist
@@ -28,7 +29,5 @@ private:
 
   bool calculateMove();
   bool executeMove();
-  bool calculateFingerMove();
-  bool executeFingerMove();
   void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg);
 };

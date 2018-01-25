@@ -40,9 +40,9 @@ int main(int argc, char **argv)
 
   geometry_msgs::PoseStamped sensedPoseTip1;//Left Finger tip---Demo data
   sensedPoseTip1.header.frame_id = "m1n6s200_link_base";
-  sensedPoseTip1.pose.position.x = -0.0574703;
-  sensedPoseTip1.pose.position.y = -0.239392;
-  sensedPoseTip1.pose.position.z = 0.644037;
+  sensedPoseTip1.pose.position.x = -0.06747;
+  sensedPoseTip1.pose.position.y = -0.384978;
+  sensedPoseTip1.pose.position.z = 0.6672;
   sensedPoseTip1.pose.orientation.x = 0.0181078;
   sensedPoseTip1.pose.orientation.y = -0.706845;
   sensedPoseTip1.pose.orientation.z = -0.0181207;

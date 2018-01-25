@@ -4,71 +4,45 @@ RoboticArm::RoboticArm(ros::NodeHandle &nh):nh_(nh){
   sub_leap_hand_ = nh_.subscribe("/handPoseTopic",1,&RoboticArm::updatePoseValues, this);
   group_ = new moveit::planning_interface::MoveGroupInterface("arm");
   gripper_group_ = new moveit::planning_interface::MoveGroupInterface("gripper");
-  receivedNewPose_ = false;
   closedJointValues_ = gripper_group_->getNamedTargetValues("Close");
+  openedJointValues_ = gripper_group_->getNamedTargetValues("Open");
+  receivedNewPose_ = false;
 }
 
 RoboticArm::~RoboticArm(){
     delete group_;
     delete gripper_group_;
 }
-bool RoboticArm::calculateFingerMove(){
-  //std::vector<double> joints = gripper_group_->getCurrentJointValues();
-  //double ratioClosed = getDistanceBetweenPoints(sensedPoseTip1_,sensedPoseTip2_)/10;
-  double ratioClosed = 0.5;
-  ROS_INFO("the ratio closed is: [%f]", ratioClosed);
-
-  std::map<std::string, double> jointValueGoal = closedJointValues_;
-  std::map<std::string, double>::iterator it = jointValueGoal.begin();
-  while (it != jointValueGoal.end()){
-    std::cout<<it->first<<" :: "<<it->second<<std::endl;
-    it->second = it->second * ratioClosed;
-    std::cout<<it->first<<" :: "<<it->second<<std::endl;
-    it++;
-  }
-  gripper_group_->setJointValueTarget(jointValueGoal);
-  return gripper_group_->plan(planGripper_);
-}
 bool RoboticArm::calculateMove(){
   //Calculate require joint values for fingers
-  // std::vector<double> joints = gripper_group_->getCurrentJointValues();
-  // //double ratioClosed = getDistanceBetweenPoints(sensedPoseTip1_,sensedPoseTip2_)/10;
-  double ratioClosed = 0.5;
-  ROS_INFO("the ratio closed is: [%f]", ratioClosed);
-
+  double ratioOpen = std::min(1.0,calculateDistanceBetweenPoints(sensedPoseTip1_,sensedPoseTip2_)/DISTANCE_BETWEEN_USER_FINGERS_FULL_OPEN);
   std::map<std::string, double> jointValueGoal = closedJointValues_;
-  std::map<std::string, double>::iterator it = jointValueGoal.begin();
-  while (it != jointValueGoal.end()){
-    it->second = it->second * ratioClosed;
-    it++;
-  }
-  //joints = myMap.find("Close");
-  //ROS_INFO("the joint value is [%f]", joints.at(0));
-  //TODO change this hardcode value to dynamic function to match user's input
-  //Need a way to find max limit on joint value when applied to both fingers
-      //---Utilized the preset positions, open and closed to get the joint values
-  //joints.at(0) = 2;//Left Finger
-  //joints.at(2) = 0;//Right Finger
 
+  std::map<std::string, double>::iterator it_jv = jointValueGoal.begin();
+  std::map<std::string, double>::iterator it_open = openedJointValues_.begin();
+  std::map<std::string, double>::iterator it_close = closedJointValues_.begin();
+  while (it_jv != jointValueGoal.end() || it_open != openedJointValues_.end() || it_close != closedJointValues_.end()){
+    it_jv->second = calculateValueBetweenRange(it_open->second, it_close->second, 1-ratioOpen);
+    it_jv++;
+    it_open++;
+    it_close++;
+  }
   group_->setPoseTarget(rotatePoseStamped(sensedPosePalm_));
   gripper_group_->setJointValueTarget(jointValueGoal);
   return (group_->plan(planArm_) && gripper_group_->plan(planGripper_));
-  //return (group_->plan(planArm_));
 }
 
-bool RoboticArm::executeFingerMove(){
-  return gripper_group_->execute(planGripper_);
-}
 bool RoboticArm::executeMove(){
   return (group_->execute(planArm_) && gripper_group_->execute(planGripper_));
-  //return group_->execute(planArm_);
 }
 
 //Sets the desired poseTargets to the received input poses
 void RoboticArm::updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
   ROS_INFO_THROTTLE(1,"Received Input. Now processing...");
-  //set desiredPose to match the HandStampedPose
+  //Record poses received from the ROS Topic
   sensedPosePalm_ = msg->posePalm;
+  sensedPoseTip2_ = msg->poseTip2;
+  sensedPoseTip1_ = msg->poseTip1;
   receivedNewPose_ = true;
 }
 
@@ -82,9 +56,6 @@ void RoboticArm::beginListening(){
       if(this->calculateMove()){
         this->executeMove();
       }
-      // if(this->calculateFingerMove()){
-      //   this->executeFingerMove();
-      // }
     }
   }
 }
