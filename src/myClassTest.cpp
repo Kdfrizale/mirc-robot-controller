@@ -42,12 +42,12 @@ bool RoboticArm::executeMove(){
 }
 
 //Sets the desired poseTargets to the received input poses
-void RoboticArm::updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg){
+void RoboticArm::updatePoseValues(const leap_controller_capstone::HandPoseStamped::ConstPtr& msg){
   ROS_INFO_THROTTLE(1,"Received Input. Now processing...");
   //Record poses received from the ROS Topic
   sensedPosePalm_ = msg->posePalm;
-  sensedPoseTip2_ = msg->poseTip2;
-  sensedPoseTip1_ = msg->poseTip1;
+  sensedPoseTip2_ = msg->poseFingers[0];
+  sensedPoseTip1_ = msg->poseFingers[1];
   receivedNewPose_ = true;
 }
 

@@ -1,6 +1,6 @@
 #include <ros/ros.h>
 #include <moveit/move_group_interface/move_group_interface.h>
-#include <arm_mimic_capstone/HandStampedPose.h>
+#include <leap_controller_capstone/HandPoseStamped.h>
 #include <utilities.h>
 
 class RoboticArm {
@@ -28,5 +28,5 @@ private:
 
   bool calculateMove();
   bool executeMove();
-  void updatePoseValues(const arm_mimic_capstone::HandStampedPose::ConstPtr& msg);
+  void updatePoseValues(const leap_controller_capstone::HandPoseStamped::ConstPtr& msg);
 };

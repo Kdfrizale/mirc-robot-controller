@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include <arm_mimic_capstone/HandStampedPose.h>
+#include <leap_controller_capstone/HandPoseStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 //#include "sensor_msgs/JointState.h"
 #include <cstdlib>
@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 {
   ros::init(argc,argv, "myDummyPub");
   ros::NodeHandle n;
-  ros::Publisher chatter_pub = n.advertise<arm_mimic_capstone::HandStampedPose>("/handPoseTopic", 10);
+  ros::Publisher chatter_pub = n.advertise<leap_controller_capstone::HandPoseStamped>("/handPoseTopic", 10);
   ros::Rate loop_rate(10);
   int count =0;
 
@@ -56,10 +56,10 @@ int main(int argc, char **argv)
     sensedposePalm.pose.position.x += 0.001;
     sensedPoseTip1.pose.position.x += 0.001;
 
-    arm_mimic_capstone::HandStampedPose msg;
-    msg.poseTip2 = sensedPoseTip2;
+    leap_controller_capstone::HandPoseStamped msg;
+    msg.poseFingers.push_back(sensedPoseTip1);
+    msg.poseFingers.push_back(sensedPoseTip2);
     msg.posePalm = sensedposePalm;
-    msg.poseTip1 = sensedPoseTip1;
 
     ROS_INFO("tip1 X: [%f]", sensedPoseTip1.pose.position.x);
     ROS_INFO("tip2 X: [%f]", sensedPoseTip2.pose.position.x);

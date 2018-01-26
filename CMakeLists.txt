@@ -19,8 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   geometric_shapes
   moveit_visual_tools
-  kinova_msgs
-  kinova_driver
+  leap_controller_capstone
 )
 
 
@@ -37,23 +36,8 @@ endif()
 
 find_package(Boost REQUIRED system filesystem date_time thread)
 
-add_message_files(
-  FILES
-  HandPose.msg
-  HandStampedPose.msg
-)
-
-generate_messages(
-  DEPENDENCIES
-  geometry_msgs
-  kinova_msgs
-)
-
-
-
 catkin_package(
   CATKIN_DEPENDS
-    message_generation
     moveit_core
     moveit_ros_planning_interface
     interactive_markers
