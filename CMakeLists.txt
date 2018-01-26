@@ -12,7 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
-  message_generation
+  geometry_msgs
   moveit_core
   moveit_ros_planning
   moveit_ros_planning_interface
@@ -57,10 +57,20 @@ link_directories(${catkin_LIBRARY_DIRS})
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS})
 
-add_executable(myClassTest src/myClassTest.cpp include/myClassTest.h include/utilities.h)
 add_library(utilities src/utilities.cpp)
+add_library(controlled_robot src/controlled_robot.cpp)
+
+add_executable(myClassTest src/myClassTest.cpp include/myClassTest.h include/utilities.h)
 target_link_libraries(myClassTest ${catkin_LIBRARIES} ${Boost_LIBRARIES} utilities)
 install(TARGETS myClassTest DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+add_executable(robotic_arm src/robotic_arm.cpp include/controlled_robot.h include/robotic_arm.h include/utilities.h)
+target_link_libraries(robotic_arm ${catkin_LIBRARIES} ${Boost_LIBRARIES} utilities controlled_robot)
+install(TARGETS robotic_arm DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+add_executable(rover src/rover.cpp include/controlled_robot.h include/rover.h include/utilities.h)
+target_link_libraries(rover ${catkin_LIBRARIES} ${Boost_LIBRARIES} utilities controlled_robot)
+install(TARGETS rover DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 add_executable(myDummyPub src/myDummyPub.cpp)
 target_link_libraries(myDummyPub ${catkin_LIBRARIES})

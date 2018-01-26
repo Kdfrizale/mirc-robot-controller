@@ -1,16 +1,10 @@
-#include <myClassTest.h>
+#include <robotic_arm.h>
 
-RoboticArm::RoboticArm(ros::NodeHandle &nh):nh_(nh){
-  std::string input_pose_topic_name;
-  nh_.getParam("leap_output_pose_topic",input_pose_topic_name);
-  ROS_INFO("the topic sub to is [%s]", input_pose_topic_name.c_str());
-  sub_leap_hand_ = nh_.subscribe(input_pose_topic_name,1,&RoboticArm::updatePoseValues, this);
-
+RoboticArm::RoboticArm(ros::NodeHandle &nh):ControlledRobot(nh){
   group_ = new moveit::planning_interface::MoveGroupInterface("arm");
   gripper_group_ = new moveit::planning_interface::MoveGroupInterface("gripper");
   closedJointValues_ = gripper_group_->getNamedTargetValues("Close");
   openedJointValues_ = gripper_group_->getNamedTargetValues("Open");
-  receivedNewPose_ = false;
 }
 
 RoboticArm::~RoboticArm(){
@@ -42,32 +36,8 @@ bool RoboticArm::executeMove(){
   return (group_->execute(planArm_) && gripper_group_->execute(planGripper_));
 }
 
-//Sets the desired poseTargets to the received input poses
-void RoboticArm::updatePoseValues(const leap_controller_capstone::HandPoseStamped::ConstPtr& msg){
-  ROS_INFO_THROTTLE(1,"Received Input. Now processing...");
-  //Record poses received from the ROS Topic
-  sensedPosePalm_ = msg->posePalm;
-  sensedPoseTip2_ = msg->poseMisc[0];
-  sensedPoseTip1_ = msg->poseFingerTips[0];
-  receivedNewPose_ = true;
-}
-
-//Begin executing callback functions for subscriptions
-void RoboticArm::beginListening(){
-  while (ros::ok()){
-    ROS_INFO_THROTTLE(1,"Waiting for input...");
-    ros::spinOnce();
-    if(receivedNewPose_){
-      receivedNewPose_ = false;
-      if(this->calculateMove()){
-        this->executeMove();
-      }
-    }
-  }
-}
-
 int main(int argc, char** argv){
-  ros::init(argc, argv, "myClassTestCode");
+  ros::init(argc, argv, "robotic_arm_node");
   ros::NodeHandle node("~");
   ros::AsyncSpinner spinner(1);
   spinner.start();

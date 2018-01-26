@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 {
   ros::init(argc,argv, "myDummyPub");
   ros::NodeHandle n;
-  ros::Publisher chatter_pub = n.advertise<leap_controller_capstone::HandPoseStamped>("/handPoseTopic", 10);
+  ros::Publisher chatter_pub = n.advertise<leap_controller_capstone::HandPoseStamped>("/leap_hand_pose", 10);
   ros::Rate loop_rate(10);
   int count =0;
 

@@ -40,8 +40,8 @@
     <arg name="config" value="true"/>
   </include>
 
-  <node name="myclasstest" pkg="arm_mimic_capstone" type="myClassTest" respawn="false" launch-prefix="$(arg launch_prefix)" output="screen">
-    <param name="input_pose_topic" value="/leap_hand_pose"/>
+  <node name="robotic_arm" pkg="arm_mimic_capstone" type="robotic_arm" respawn="false" launch-prefix="$(arg launch_prefix)" output="screen">
+    <param name="leap_output_pose_topic" value="/leap_hand_pose"/>
   </node>
 
 
