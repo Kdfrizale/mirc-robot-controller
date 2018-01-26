@@ -1,7 +1,10 @@
 #include <myClassTest.h>
 
 RoboticArm::RoboticArm(ros::NodeHandle &nh):nh_(nh){
-  sub_leap_hand_ = nh_.subscribe("/handPoseTopic",1,&RoboticArm::updatePoseValues, this);
+  std::string input_pose_topic_name;
+  nh_.getParam("input_pose_topic",input_pose_topic_name);
+  sub_leap_hand_ = nh_.subscribe(input_pose_topic_name,1,&RoboticArm::updatePoseValues, this);
+  
   group_ = new moveit::planning_interface::MoveGroupInterface("arm");
   gripper_group_ = new moveit::planning_interface::MoveGroupInterface("gripper");
   closedJointValues_ = gripper_group_->getNamedTargetValues("Close");
@@ -12,16 +15,6 @@ RoboticArm::RoboticArm(ros::NodeHandle &nh):nh_(nh){
 RoboticArm::~RoboticArm(){
     delete group_;
     delete gripper_group_;
-}
-void RoboticArm::translatePoseFromLeap(geometry_msgs::PoseStamped& inputPose){
-  //TODO Add the necessary adjustments to the pose before Planning can start
-  //Things Needed:
-    //Axis Switch,,, use rotatePoseStamped function
-      //both on orientation and position
-    //yOffset ,,, so the arm is not centered at its base
-    //any other axis offset Needed
-
-    //TODO Finally add this function to updatePoseValues, and remove rotatePoseStamped from calculateMove
 }
 
 bool RoboticArm::calculateMove(){
@@ -74,7 +67,7 @@ void RoboticArm::beginListening(){
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "myClassTestCode");
-  ros::NodeHandle node;
+  ros::NodeHandle node("~");
   ros::AsyncSpinner spinner(1);
   spinner.start();
   ROS_INFO("RoboticArm Node has started");

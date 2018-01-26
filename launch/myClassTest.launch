@@ -41,6 +41,7 @@
   </include>
 
   <node name="myclasstest" pkg="arm_mimic_capstone" type="myClassTest" respawn="false" launch-prefix="$(arg launch_prefix)" output="screen">
+    <param name="input_pose_topic" value = "/handPoseTopic"/>
   </node>
 
 
