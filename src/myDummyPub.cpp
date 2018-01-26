@@ -57,8 +57,9 @@ int main(int argc, char **argv)
     sensedPoseTip1.pose.position.x += 0.001;
 
     leap_controller_capstone::HandPoseStamped msg;
-    msg.poseFingers.push_back(sensedPoseTip1);
-    msg.poseFingers.push_back(sensedPoseTip2);
+    msg.poseFingerTips.push_back(sensedPoseTip1);
+    msg.poseFingerTips.push_back(sensedPoseTip2);
+    msg.poseMisc.push_back(sensedPoseTip2);
     msg.posePalm = sensedposePalm;
 
     ROS_INFO("tip1 X: [%f]", sensedPoseTip1.pose.position.x);

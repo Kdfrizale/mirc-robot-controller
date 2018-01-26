@@ -46,8 +46,8 @@ void RoboticArm::updatePoseValues(const leap_controller_capstone::HandPoseStampe
   ROS_INFO_THROTTLE(1,"Received Input. Now processing...");
   //Record poses received from the ROS Topic
   sensedPosePalm_ = msg->posePalm;
-  sensedPoseTip2_ = msg->poseFingers[0];
-  sensedPoseTip1_ = msg->poseFingers[1];
+  sensedPoseTip2_ = msg->poseMisc[0];
+  sensedPoseTip1_ = msg->poseFingerTips[0];
   receivedNewPose_ = true;
 }
 
