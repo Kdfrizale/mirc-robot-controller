@@ -11,7 +11,6 @@ public:
 
 private:
   ros::NodeHandle nh_;
-  double yOffset_;
   bool receivedNewPose_;
   std::map<std::string, double> closedJointValues_;
   std::map<std::string, double> openedJointValues_;

@@ -4,7 +4,7 @@ RoboticArm::RoboticArm(ros::NodeHandle &nh):nh_(nh){
   std::string input_pose_topic_name;
   nh_.getParam("input_pose_topic",input_pose_topic_name);
   sub_leap_hand_ = nh_.subscribe(input_pose_topic_name,1,&RoboticArm::updatePoseValues, this);
-  
+
   group_ = new moveit::planning_interface::MoveGroupInterface("arm");
   gripper_group_ = new moveit::planning_interface::MoveGroupInterface("gripper");
   closedJointValues_ = gripper_group_->getNamedTargetValues("Close");
