@@ -1,10 +1,19 @@
 #include <robotic_arm.h>
 
 RoboticArm::RoboticArm(ros::NodeHandle &nh):ControlledRobot(nh){
-  group_ = new moveit::planning_interface::MoveGroupInterface("arm");
-  gripper_group_ = new moveit::planning_interface::MoveGroupInterface("gripper");
-  closedJointValues_ = gripper_group_->getNamedTargetValues("Close");
-  openedJointValues_ = gripper_group_->getNamedTargetValues("Open");
+  //TODO make these parameters
+  std::string tempParam;
+  nh_.getParam("moveit_planning_group_arm_name",tempParam);
+  group_ = new moveit::planning_interface::MoveGroupInterface(tempParam);
+
+  nh_.getParam("moveit_planning_group_gripper_name",tempParam);
+  gripper_group_ = new moveit::planning_interface::MoveGroupInterface(tempParam);
+
+  nh_.getParam("moveit_gripper_close_pose_name",tempParam);
+  closedJointValues_ = gripper_group_->getNamedTargetValues(tempParam);
+
+  nh_.getParam("moveit_gripper_open_pose_name",tempParam);
+  openedJointValues_ = gripper_group_->getNamedTargetValues(tempParam);
 }
 
 RoboticArm::~RoboticArm(){

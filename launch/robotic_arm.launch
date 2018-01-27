@@ -42,6 +42,10 @@
 
   <node name="robotic_arm" pkg="arm_mimic_capstone" type="robotic_arm" respawn="false" launch-prefix="$(arg launch_prefix)" output="screen">
     <param name="leap_output_pose_topic" value="/leap_hand_pose"/>
+    <param name="moveit_planning_group_arm_name" value="arm"/>
+    <param name="moveit_planning_group_gripper_name" value="gripper"/>
+    <param name="moveit_gripper_close_pose_name" value="Close"/>
+    <param name="moveit_gripper_open_pose_name" value="Open"/>
   </node>
 
 
