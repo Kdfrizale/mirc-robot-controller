@@ -29,7 +29,7 @@ bool RoboticArm::calculateMove(){
   std::map<std::string, double>::iterator it_jv = jointValueGoal.begin();
   std::map<std::string, double>::iterator it_open = openedJointValues_.begin();
   std::map<std::string, double>::iterator it_close = closedJointValues_.begin();
-  while (it_jv != jointValueGoal.end() || it_open != openedJointValues_.end() || it_close != closedJointValues_.end()){
+  while (it_jv != jointValueGoal.end() && it_open != openedJointValues_.end() && it_close != closedJointValues_.end()){
     //Set jointValueGoal to be the ratio between the robot's MoveIt defined Open and Close preset Poses
     it_jv->second = calculateValueBetweenRange(it_open->second, it_close->second, 1-ratioOpen);
     it_jv++;
