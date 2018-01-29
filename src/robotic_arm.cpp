@@ -29,7 +29,7 @@ bool RoboticArm::calculateMove(){
   std::map<std::string, double>::iterator it_jv = jointValueGoal.begin();
   std::map<std::string, double>::iterator it_open = openedJointValues_.begin();
   std::map<std::string, double>::iterator it_close = closedJointValues_.begin();
-  while (it_jv != jointValueGoal.end() && it_open != openedJointValues_.end() && it_close != closedJointValues_.end()){
+  while (it_jv != jointValueGoal.end() || it_open != openedJointValues_.end() || it_close != closedJointValues_.end()){
     //Set jointValueGoal to be the ratio between the robot's MoveIt defined Open and Close preset Poses
     it_jv->second = calculateValueBetweenRange(it_open->second, it_close->second, 1-ratioOpen);
     it_jv++;
@@ -37,12 +37,28 @@ bool RoboticArm::calculateMove(){
     it_close++;
   }
   group_->setPoseTarget(rotatePoseStamped(sensedPosePalm_));
+  //group_->setPoseTarget(group_->getRandomPose());
   gripper_group_->setJointValueTarget(jointValueGoal);
   return (group_->plan(planArm_) && gripper_group_->plan(planGripper_));
 }
 
 bool RoboticArm::executeMove(){
-  return (group_->execute(planArm_) && gripper_group_->execute(planGripper_));
+  printPlanInfo(planArm_);
+  planArm_.trajectory_.joint_trajectory.header.stamp = ros::Time::now() + ros::Duration(8.1);
+  return (group_->asyncExecute(planArm_) && gripper_group_->asyncExecute(planGripper_));
+}
+
+void RoboticArm::printPlanInfo(moveit::planning_interface::MoveGroupInterface::Plan aPlan){
+  //ROS_INFO("ROS TIME: [%f]", ros::Time::now().toSec());
+  ROS_INFO("PLAN INFO: the planning time is [%f]", aPlan.planning_time_);
+  ROS_INFO("PLAN INFO: the time stamp is [%f]", aPlan.trajectory_.joint_trajectory.header.stamp.sec);
+  for (std::string name : aPlan.trajectory_.joint_trajectory.joint_names){
+    ROS_INFO("PLAN INFO: Joint Name: [%s]", name.c_str());
+  }
+  for (trajectory_msgs::JointTrajectoryPoint aPoint : aPlan.trajectory_.joint_trajectory.points){
+    ROS_INFO("PLAN INFO: Time from start for a point: [%f]", aPoint.time_from_start.toSec());
+  }
+
 }
 
 int main(int argc, char** argv){

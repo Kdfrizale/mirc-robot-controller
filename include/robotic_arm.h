@@ -17,4 +17,6 @@ private:
 
   bool calculateMove();
   bool executeMove();
+
+  void printPlanInfo(moveit::planning_interface::MoveGroupInterface::Plan aPlan);
 };
