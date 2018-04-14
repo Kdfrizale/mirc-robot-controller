@@ -2,7 +2,7 @@
 <package>
   <name>mir_controller</name>
   <version>0.0.0</version>
-  <description>The arm_mimic_capstone package</description>
+  <description>The mir_controller package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
