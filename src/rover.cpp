@@ -50,8 +50,8 @@ Rover::~Rover(){
 //Calculate require TwistStamped Message
 bool Rover::calculateMove(){
   //Multiply the speed and turning rate by a scale coefficient based on size of rover
-  goal_.twist.linear.x = -sensedPosePalm_.position.y * 3;
-  goal_.twist.angular.z = sensedPosePalm_.position.x * 4.5;
+  goal_.twist.linear.x = sensedPosePalm_.position.x * 3;
+  goal_.twist.angular.z = sensedPosePalm_.position.y * 4.5;
   return true;
 }
 

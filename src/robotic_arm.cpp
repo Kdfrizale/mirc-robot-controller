@@ -61,13 +61,13 @@ RoboticArm::~RoboticArm(){
 }
 
 //Sets the desired poseTargets to the received input poses
-void RoboticArm::updatePoseValues(const leap_controller::HandPoseStamped::ConstPtr& msg){
+void RoboticArm::updatePoseValues(const leap_interface::HandPoseStamped::ConstPtr& msg){
   ROS_INFO_THROTTLE(1,"Received Input. Now processing...");
   //Record poses received from the ROS Topic
   sensedPosePalm_ = msg->posePalm;
-  auto index_finger = std::find_if(msg->poseFingers.begin(),msg->poseFingers.end(), [](const leap_controller::FingerPose& finger)
+  auto index_finger = std::find_if(msg->poseFingers.begin(),msg->poseFingers.end(), [](const leap_interface::FingerPose& finger)
                                                                     {return finger.name == "index";});
-  auto thumb_finger = std::find_if(msg->poseFingers.begin(),msg->poseFingers.end(), [](const leap_controller::FingerPose& finger)
+  auto thumb_finger = std::find_if(msg->poseFingers.begin(),msg->poseFingers.end(), [](const leap_interface::FingerPose& finger)
                                                                     {return finger.name == "thumb";});
   sensedPoseTip2_ = index_finger->poseProximalPhalange;
   sensedPoseTip1_ = thumb_finger->poseDistalPhalange;

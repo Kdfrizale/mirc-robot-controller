@@ -57,7 +57,7 @@ private:
 
   bool calculateMove();
   bool executeMove();
-  void updatePoseValues(const leap_controller::HandPoseStamped::ConstPtr& msg);
+  void updatePoseValues(const leap_interface::HandPoseStamped::ConstPtr& msg);
 
   void printPlanInfo(moveit::planning_interface::MoveGroupInterface::Plan aPlan);
 };

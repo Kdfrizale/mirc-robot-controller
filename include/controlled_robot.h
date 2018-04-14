@@ -36,7 +36,7 @@
 
 /* Authors: Ricardo Flores, Kyle Frizzell, and David Conner */
 #include <ros/ros.h>
-#include <leap_controller/HandPoseStamped.h>
+#include <leap_interface/HandPoseStamped.h>
 #include <utilities.h>
 
 class ControlledRobot {
@@ -55,5 +55,5 @@ protected:
 
   virtual bool calculateMove();
   virtual bool executeMove();
-  void updatePoseValues(const leap_controller::HandPoseStamped::ConstPtr& msg);
+  void updatePoseValues(const leap_interface::HandPoseStamped::ConstPtr& msg);
 };
