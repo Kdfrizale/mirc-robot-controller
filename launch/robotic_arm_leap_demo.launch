@@ -1,0 +1,6 @@
+<launch>
+
+  <include file="$(find arm_mimic_capstone)/launch/robotic_arm_simulation.launch" />
+  <include file="$(find leap_controller_capstone)/launch/leap_sensor.launch" />
+
+</launch>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>arm_mimic_capstone</name>
+  <name>mir_controller</name>
   <version>0.0.0</version>
   <description>The arm_mimic_capstone package</description>
 

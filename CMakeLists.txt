@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(arm_mimic_capstone)
+project(mir_controller)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -19,7 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   geometric_shapes
   moveit_visual_tools
-  leap_controller_capstone
+  leap_controller
 )
 
 
@@ -60,10 +60,6 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS})
 add_library(utilities src/utilities.cpp)
 add_library(controlled_robot src/controlled_robot.cpp)
 
-add_executable(myClassTest src/myClassTest.cpp include/myClassTest.h include/utilities.h)
-target_link_libraries(myClassTest ${catkin_LIBRARIES} ${Boost_LIBRARIES} utilities)
-install(TARGETS myClassTest DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
 add_executable(robotic_arm src/robotic_arm.cpp include/controlled_robot.h include/robotic_arm.h include/utilities.h)
 target_link_libraries(robotic_arm ${catkin_LIBRARIES} ${Boost_LIBRARIES} utilities controlled_robot)
 install(TARGETS robotic_arm DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
@@ -71,6 +67,3 @@ install(TARGETS robotic_arm DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 add_executable(rover src/rover.cpp include/controlled_robot.h include/rover.h include/utilities.h)
 target_link_libraries(rover ${catkin_LIBRARIES} ${Boost_LIBRARIES} utilities controlled_robot)
 install(TARGETS rover DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
-add_executable(myDummyPub src/myDummyPub.cpp)
-target_link_libraries(myDummyPub ${catkin_LIBRARIES})
